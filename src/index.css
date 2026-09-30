@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   PRINT SPECIFIC STYLESHEET (A4 CERTIFICATE OF DATA DESTRUCTION)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  /* Force white background and dark text for clean, professional paper printing */
+  html,
+  body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reset outer application containers so scrolling/viewport constraints don't clip output */
+  #root,
+  .flex.h-screen,
+  .flex-1.flex.flex-col,
+  main {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+  }
+
+  /* When modal is open during print, hide the underlying page */
+  body.modal-open-printing main {
+    display: none !important;
+  }
+
+  /* Hide all non-printable elements */
+  aside,
+  nav,
+  header,
+  .no-print,
+  [data-no-print],
+  .print\:hidden,
+  button,
+  input,
+  select,
+  textarea {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Modal wrapper reset for printing */
+  .fixed.inset-0.z-50 {
+    position: static !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .fixed.inset-0.z-50 > div {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Dedicated print layout for the certificate */
+  .certificate-print-document {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 20px 24px !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 3px double #0f172a !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Dark mode text/box overrides for printing in high-contrast crisp ink */
+  .certificate-print-document .print-dark-text {
+    color: #0f172a !important;
+  }
+
+  .certificate-print-document .print-muted-text {
+    color: #475569 !important;
+  }
+
+  .certificate-print-document .print-border {
+    border-color: #94a3b8 !important;
+  }
+
+  .certificate-print-document .print-box-bg {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+
+  .certificate-print-document .print-code-bg {
+    background-color: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+  }
+
+  .certificate-print-document .print-highlight {
+    color: #047857 !important;
+  }
+
+  .certificate-print-document .print-watermark {
+    opacity: 0.04 !important;
+    color: #0f172a !important;
+  }
+}

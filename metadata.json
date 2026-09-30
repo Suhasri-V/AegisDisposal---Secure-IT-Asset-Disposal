@@ -1,0 +1,6 @@
+{
+  "name": "AegisDisposal - Secure IT Asset Disposal & Data Wiping Platform",
+  "description": "Enterprise cybersecurity platform for IT asset disposal lifecycle management, verifiable data wiping, regulatory compliance audits, and tamper-evident certificates.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
