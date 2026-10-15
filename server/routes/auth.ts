@@ -8,6 +8,7 @@ import {
   authenticateToken,
   AuthenticatedRequest,
   generateToken,
+  JWT_SECRET,
 } from '../middleware/auth';
 
 const router = Router();
@@ -29,9 +30,14 @@ function getGoogleOAuthConfiguration():
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
   const redirectUri =
     process.env.GOOGLE_REDIRECT_URI?.trim() ||
-    (isProduction ? '' : `http://localhost:${process.env.PORT || 5000}${GOOGLE_CALLBACK_PATH}`);
+    (isProduction
+      ? (process.env.RENDER_EXTERNAL_URL
+          ? `${process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, '')}${GOOGLE_CALLBACK_PATH}`
+          : `https://aegisdisposal-secure-it-asset-disposal.onrender.com${GOOGLE_CALLBACK_PATH}`)
+      : `http://localhost:${process.env.PORT || 5000}${GOOGLE_CALLBACK_PATH}`);
   const frontendUrl =
-    process.env.FRONTEND_URL?.trim() || (isProduction ? '' : 'http://localhost:3000');
+    process.env.FRONTEND_URL?.trim().replace(/\/+$/, '') ||
+    (isProduction ? 'https://aegis-disposal-secure-it-asset-disp.vercel.app' : 'http://localhost:3000');
   const missing = [
     !clientId && 'GOOGLE_CLIENT_ID',
     !clientSecret && 'GOOGLE_CLIENT_SECRET',
@@ -67,7 +73,7 @@ function getGoogleOAuthConfiguration():
 
   if (
     (frontend.protocol !== 'https:' && (isProduction || frontend.protocol !== 'http:')) ||
-    frontend.pathname !== '/' ||
+    (frontend.pathname !== '/' && frontend.pathname !== '') ||
     frontend.search ||
     frontend.hash
   ) {
@@ -127,6 +133,36 @@ function getOAuthStateCookie(req: AuthenticatedRequest): string | undefined {
   return stateCookie?.slice(OAUTH_STATE_COOKIE.length + 1);
 }
 
+function createSignedOAuthState(): string {
+  const nonce = crypto.randomBytes(16).toString('hex');
+  const timestamp = Date.now().toString(36);
+  const data = `${timestamp}.${nonce}`;
+  const sig = crypto.createHmac('sha256', JWT_SECRET).update(data).digest('hex');
+  return `${data}.${sig}`;
+}
+
+function verifySignedOAuthState(state: string): boolean {
+  if (typeof state !== 'string') return false;
+  const parts = state.split('.');
+  if (parts.length !== 3) return false;
+  const [timestamp, nonce, sig] = parts;
+  const data = `${timestamp}.${nonce}`;
+  const expectedSig = crypto.createHmac('sha256', JWT_SECRET).update(data).digest('hex');
+  if (sig.length !== expectedSig.length) return false;
+  try {
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+  const time = parseInt(timestamp, 36);
+  if (isNaN(time) || Date.now() - time > 15 * 60 * 1000 || Date.now() - time < -60 * 1000) {
+    return false;
+  }
+  return true;
+}
+
 function recordSuccessfulLogin(user: User, req: AuthenticatedRequest): User {
   const updatedUser = db.updateUser({
     ...user,
@@ -170,7 +206,7 @@ router.get('/google', (req: AuthenticatedRequest, res: Response): void => {
   }
 
   const { clientId, redirectUri } = result.configuration;
-  const state = crypto.randomBytes(32).toString('hex');
+  const state = createSignedOAuthState();
   setOAuthStateCookie(res, state);
   const authorizationUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   authorizationUrl.searchParams.set('client_id', clientId);
@@ -195,13 +231,14 @@ router.get('/google/callback', async (req: AuthenticatedRequest, res: Response):
   const { code, state, error: oauthError } = req.query;
   const expectedState = getOAuthStateCookie(req);
 
-  if (
-    typeof state !== 'string' ||
-    !/^[a-f0-9]{64}$/.test(state) ||
-    !expectedState ||
-    !/^[a-f0-9]{64}$/.test(expectedState) ||
-    !crypto.timingSafeEqual(Buffer.from(state), Buffer.from(expectedState))
-  ) {
+  const isSignedStateValid = typeof state === 'string' && verifySignedOAuthState(state);
+  const isCookieStateValid =
+    typeof state === 'string' &&
+    typeof expectedState === 'string' &&
+    state.length === expectedState.length &&
+    crypto.timingSafeEqual(Buffer.from(state), Buffer.from(expectedState));
+
+  if (!isSignedStateValid && !isCookieStateValid) {
     // Redirect to the SPA with an error query param so AuthPage can display a friendly message.
     // We do NOT return raw JSON here — the user's browser is on this URL after a Google redirect.
     console.warn('[Google OAuth] State mismatch — possible CSRF or stale session. Redirecting to login.');
