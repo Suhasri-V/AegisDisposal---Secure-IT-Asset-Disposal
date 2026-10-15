@@ -3,7 +3,7 @@ services:
     name: aegisdisposal-backend
     env: node
     plan: starter
-    buildCommand: npm ci
+    buildCommand: npm ci --include=dev
     startCommand: npm run start
     disk:
       name: aegisdisposal-data
