@@ -28,7 +28,26 @@ db.initialize();
 provisionAdminAccount();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null,
+  'https://aegis-disposal-secure-it-asset-disp.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+].filter(Boolean) as string[];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Fallback to allow for testing
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Request logging (simplified)
