@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://aegisdisposal-backend.onrender.com/api/:path*"
+      "destination": "https://aegisdisposal-secure-it-asset-disposal.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
