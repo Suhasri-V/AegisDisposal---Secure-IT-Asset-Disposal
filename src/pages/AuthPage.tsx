@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, LockKeyhole, ShieldCheck, UserPlus, AlertCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { api } from '../api/client';
+import { API_ORIGIN, api } from '../api/client';
 
 const GOOGLE_AUTH_ERRORS: Record<string, string> = {
   google_state_invalid:
-    'Google sign-in could not verify the login session. Start again from this page; if it continues, clear localhost cookies and retry using the same browser address.',
+    'Google sign-in could not verify the login session. Start again from this HTTPS application address; if it continues, verify the configured frontend and callback URLs.',
   google_sign_in_cancelled: 'Google sign-in was cancelled. Select an account and approve the sign-in to continue.',
   google_sign_in_failed:
     'Google could not complete authentication. Please contact your administrator to verify the OAuth client credentials and callback URL.',
   google_oauth_client_invalid:
-    'Google rejected the configured Client Secret. Create or reset the secret for this same OAuth Client ID in Google Cloud Console, update GOOGLE_CLIENT_SECRET in the project .env file, and restart the backend.',
+    'Google rejected the server-configured OAuth credentials. Verify that GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET belong to the same Google OAuth client, then update them in the Render environment settings.',
+  google_oauth_not_configured:
+    'Google sign-in is not configured on the backend. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, and FRONTEND_URL in the Render environment settings.',
   google_authorization_expired:
     'Google sign-in authorization expired or could not be verified. Start again from this page; if it repeats, ask your administrator to check the callback URL.',
   google_profile_failed:
@@ -40,16 +42,18 @@ export const AuthPage: React.FC = () => {
 
   // Google OAuth availability — checked from the backend on mount
   const [googleEnabled, setGoogleEnabled] = useState<boolean | null>(null); // null = checking
+  const [googleStatusMessage, setGoogleStatusMessage] = useState('');
 
   useEffect(() => {
     api
       .googleAuthStatus()
       .then((res) => {
         setGoogleEnabled(res.googleAuthEnabled);
+        setGoogleStatusMessage(res.message);
       })
       .catch(() => {
-        // If backend unreachable, default to disabled
         setGoogleEnabled(false);
+        setGoogleStatusMessage('Could not contact the authentication service. Please try again later.');
       });
   }, []);
 
@@ -248,8 +252,7 @@ export const AuthPage: React.FC = () => {
                   id="google-signin-btn"
                   type="button"
                   onClick={() => {
-                    const apiBase = (import.meta.env.VITE_API_URL ? (import.meta.env.VITE_API_URL as string).replace(/\/$/, '') : '');
-                    window.location.assign(`${apiBase}/api/auth/google`);
+                    window.location.assign(`${API_ORIGIN}/api/auth/google`);
                   }}
                   className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-700 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
                 >
@@ -282,12 +285,15 @@ export const AuthPage: React.FC = () => {
                     <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <p className="text-[11px] leading-relaxed text-slate-300">
                       <span className="text-amber-400 font-semibold block mb-0.5">Google Sign-In not configured</span>
-                      Set <code className="text-cyan-300">GOOGLE_CLIENT_ID</code> and{' '}
-                      <code className="text-cyan-300">GOOGLE_CLIENT_SECRET</code> in your{' '}
-                      <code className="text-cyan-300">.env</code> file, then restart the server.
+                      {googleStatusMessage}
                     </p>
                   </div>
                 </div>
+              )}
+              {googleEnabled === false && (
+                <p role="status" className="mt-2 text-center text-xs text-amber-300">
+                  {googleStatusMessage}
+                </p>
               )}
             </>
           )}

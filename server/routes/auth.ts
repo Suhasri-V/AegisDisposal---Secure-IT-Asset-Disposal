@@ -12,15 +12,78 @@ import {
 
 const router = Router();
 const OAUTH_STATE_COOKIE = 'aegis_google_oauth_state';
-const GOOGLE_REDIRECT_URI =
-  process.env.GOOGLE_REDIRECT_URI || `http://localhost:${process.env.PORT || 5000}/api/auth/google/callback`;
-const FRONTEND_URL = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, '');
-if (
-  process.env.NODE_ENV === 'production' &&
-  process.env.GOOGLE_CLIENT_ID &&
-  (!GOOGLE_REDIRECT_URI.startsWith('https://') || !FRONTEND_URL.startsWith('https://'))
-) {
-  throw new Error('Production Google OAuth requires HTTPS GOOGLE_REDIRECT_URI and FRONTEND_URL values.');
+const GOOGLE_CALLBACK_PATH = '/api/auth/google/callback';
+
+interface GoogleOAuthConfiguration {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  frontendUrl: string;
+}
+
+function getGoogleOAuthConfiguration():
+  | { configuration: GoogleOAuthConfiguration; error?: never }
+  | { configuration?: never; error: string } {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const redirectUri =
+    process.env.GOOGLE_REDIRECT_URI?.trim() ||
+    (isProduction ? '' : `http://localhost:${process.env.PORT || 5000}${GOOGLE_CALLBACK_PATH}`);
+  const frontendUrl =
+    process.env.FRONTEND_URL?.trim() || (isProduction ? '' : 'http://localhost:3000');
+  const missing = [
+    !clientId && 'GOOGLE_CLIENT_ID',
+    !clientSecret && 'GOOGLE_CLIENT_SECRET',
+    !redirectUri && 'GOOGLE_REDIRECT_URI',
+    !frontendUrl && 'FRONTEND_URL',
+  ].filter((name): name is string => Boolean(name));
+
+  if (!clientId || !clientSecret || !redirectUri || !frontendUrl) {
+    return {
+      error: `Google sign-in is unavailable. Set ${missing.join(', ')} in the backend environment.`,
+    };
+  }
+
+  let callback: URL;
+  let frontend: URL;
+  try {
+    callback = new URL(redirectUri);
+    frontend = new URL(frontendUrl);
+  } catch {
+    return { error: 'Google sign-in is unavailable because its redirect configuration is invalid.' };
+  }
+
+  if (
+    callback.pathname !== GOOGLE_CALLBACK_PATH ||
+    callback.search ||
+    callback.hash ||
+    (isProduction && callback.protocol !== 'https:')
+  ) {
+    return {
+      error: `GOOGLE_REDIRECT_URI must be an ${isProduction ? 'HTTPS ' : ''}URL ending in ${GOOGLE_CALLBACK_PATH}.`,
+    };
+  }
+
+  if (
+    (frontend.protocol !== 'https:' && (isProduction || frontend.protocol !== 'http:')) ||
+    frontend.pathname !== '/' ||
+    frontend.search ||
+    frontend.hash
+  ) {
+    return {
+      error: `FRONTEND_URL must be the ${isProduction ? 'HTTPS ' : ''}frontend origin without a path.`,
+    };
+  }
+
+  return {
+    configuration: {
+      clientId,
+      clientSecret,
+      redirectUri: callback.toString(),
+      frontendUrl: frontend.origin,
+    },
+  };
 }
 
 function sanitizeUser(user: User): Omit<User, 'passwordHash' | 'passwordSalt' | 'googleId'> {
@@ -39,7 +102,7 @@ function isStrongPassword(password: string): boolean {
 }
 
 function setOAuthStateCookie(res: Response, value: string): void {
-  const secure = GOOGLE_REDIRECT_URI.startsWith('https://') ? '; Secure' : '';
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
   res.setHeader(
     'Set-Cookie',
     `${OAUTH_STATE_COOKIE}=${value}; HttpOnly; SameSite=Lax; Path=/api/auth/google/callback; Max-Age=600${secure}`
@@ -47,7 +110,7 @@ function setOAuthStateCookie(res: Response, value: string): void {
 }
 
 function clearOAuthStateCookie(res: Response): void {
-  const secure = GOOGLE_REDIRECT_URI.startsWith('https://') ? '; Secure' : '';
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
   res.setHeader(
     'Set-Cookie',
     `${OAUTH_STATE_COOKIE}=; HttpOnly; SameSite=Lax; Path=/api/auth/google/callback; Max-Age=0${secure}`
@@ -86,36 +149,32 @@ function recordSuccessfulLogin(user: User, req: AuthenticatedRequest): User {
 // GET /api/auth/google/status - Returns whether Google OAuth is configured.
 // The frontend uses this to enable or gracefully disable the "Continue with Google" button.
 router.get('/google/status', (req: AuthenticatedRequest, res: Response): void => {
-  const configured = Boolean(
-    process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim()
-  );
+  const result = getGoogleOAuthConfiguration();
   res.json({
     success: true,
-    googleAuthEnabled: configured,
-    message: configured
-      ? 'Google sign-in is available.'
-      : 'Google sign-in is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file.',
+    googleAuthEnabled: Boolean(result.configuration),
+    message: result.configuration ? 'Google sign-in is available.' : result.error,
   });
 });
 
 // GET /api/auth/google - Start Google OAuth. The callback URL is GOOGLE_REDIRECT_URI.
 router.get('/google', (req: AuthenticatedRequest, res: Response): void => {
-  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
-  if (!clientId || !clientSecret) {
+  const result = getGoogleOAuthConfiguration();
+  if (!result.configuration) {
     res.status(503).json({
       success: false,
       error: 'GoogleOAuthNotConfigured',
-      message: 'Google sign-in is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.',
+      message: result.error,
     });
     return;
   }
 
+  const { clientId, redirectUri } = result.configuration;
   const state = crypto.randomBytes(32).toString('hex');
   setOAuthStateCookie(res, state);
   const authorizationUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   authorizationUrl.searchParams.set('client_id', clientId);
-  authorizationUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI);
+  authorizationUrl.searchParams.set('redirect_uri', redirectUri);
   authorizationUrl.searchParams.set('response_type', 'code');
   authorizationUrl.searchParams.set('scope', 'openid email profile');
   authorizationUrl.searchParams.set('state', state);
@@ -125,9 +184,16 @@ router.get('/google', (req: AuthenticatedRequest, res: Response): void => {
 
 // GET /api/auth/google/callback - Exchange the Google authorization code server-side.
 router.get('/google/callback', async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  clearOAuthStateCookie(res);
+  const result = getGoogleOAuthConfiguration();
+  if (!result.configuration) {
+    res.status(503).send(result.error);
+    return;
+  }
+
+  const { clientId, clientSecret, redirectUri, frontendUrl } = result.configuration;
   const { code, state, error: oauthError } = req.query;
   const expectedState = getOAuthStateCookie(req);
-  clearOAuthStateCookie(res);
 
   if (
     typeof state !== 'string' ||
@@ -139,23 +205,12 @@ router.get('/google/callback', async (req: AuthenticatedRequest, res: Response):
     // Redirect to the SPA with an error query param so AuthPage can display a friendly message.
     // We do NOT return raw JSON here — the user's browser is on this URL after a Google redirect.
     console.warn('[Google OAuth] State mismatch — possible CSRF or stale session. Redirecting to login.');
-    res.redirect(`${FRONTEND_URL}/?error=google_state_invalid`);
+    res.redirect(`${frontendUrl}/?error=google_state_invalid`);
     return;
   }
 
   if (oauthError || typeof code !== 'string') {
-    res.redirect(`${FRONTEND_URL}/?error=google_sign_in_cancelled`);
-    return;
-  }
-
-  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
-  if (!clientId || !clientSecret) {
-    res.status(503).json({
-      success: false,
-      error: 'GoogleOAuthNotConfigured',
-      message: 'Google sign-in is not configured.',
-    });
+    res.redirect(`${frontendUrl}/?error=google_sign_in_cancelled`);
     return;
   }
 
@@ -167,7 +222,7 @@ router.get('/google/callback', async (req: AuthenticatedRequest, res: Response):
         code,
         client_id: clientId,
         client_secret: clientSecret,
-        redirect_uri: GOOGLE_REDIRECT_URI,
+        redirect_uri: redirectUri,
         grant_type: 'authorization_code',
       }),
     });
@@ -186,13 +241,13 @@ router.get('/google/callback', async (req: AuthenticatedRequest, res: Response):
           : tokenError === 'invalid_grant'
             ? 'google_authorization_expired'
             : 'google_sign_in_failed';
-      res.redirect(`${FRONTEND_URL}/?error=${failure}`);
+      res.redirect(`${frontendUrl}/?error=${failure}`);
       return;
     }
 
     const tokenData = (await tokenResponse.json()) as { access_token?: string };
     if (!tokenData.access_token) {
-      res.redirect(`${FRONTEND_URL}/?error=google_sign_in_failed`);
+      res.redirect(`${frontendUrl}/?error=google_sign_in_failed`);
       return;
     }
 
@@ -201,7 +256,7 @@ router.get('/google/callback', async (req: AuthenticatedRequest, res: Response):
     });
     if (!profileResponse.ok) {
       console.error('[Google OAuth] Userinfo request failed:', profileResponse.status);
-      res.redirect(`${FRONTEND_URL}/?error=google_profile_failed`);
+      res.redirect(`${frontendUrl}/?error=google_profile_failed`);
       return;
     }
 
@@ -213,24 +268,24 @@ router.get('/google/callback', async (req: AuthenticatedRequest, res: Response):
       picture?: string;
     };
     if (!profile.sub || !profile.email || profile.email_verified !== true) {
-      res.redirect(`${FRONTEND_URL}/?error=google_email_not_verified`);
+      res.redirect(`${frontendUrl}/?error=google_email_not_verified`);
       return;
     }
 
     const email = profile.email.trim().toLowerCase();
     const adminConfiguration = getAdminConfiguration();
     if (email === adminConfiguration?.email) {
-      res.redirect(`${FRONTEND_URL}/?error=use_admin_login`);
+      res.redirect(`${frontendUrl}/?error=use_admin_login`);
       return;
     }
 
     let user = db.getUserByGoogleId(profile.sub) || db.getUserByEmail(email);
     if (user && (user.role !== 'User' || user.email.toLowerCase() !== email)) {
-      res.redirect(`${FRONTEND_URL}/?error=account_not_eligible`);
+      res.redirect(`${frontendUrl}/?error=account_not_eligible`);
       return;
     }
     if (user?.status !== undefined && user.status !== 'Active') {
-      res.redirect(`${FRONTEND_URL}/?error=account_inactive`);
+      res.redirect(`${frontendUrl}/?error=account_inactive`);
       return;
     }
 
@@ -260,10 +315,10 @@ router.get('/google/callback', async (req: AuthenticatedRequest, res: Response):
 
     const authenticatedUser = recordSuccessfulLogin(user, req);
     const token = generateToken(authenticatedUser);
-    res.redirect(`${FRONTEND_URL}/#/oauth/callback?token=${encodeURIComponent(token)}`);
+    res.redirect(`${frontendUrl}/#/oauth/callback?token=${encodeURIComponent(token)}`);
   } catch (error) {
     console.error('Google OAuth callback failed:', error);
-    res.redirect(`${FRONTEND_URL}/user/login?error=google_sign_in_failed`);
+    res.redirect(`${frontendUrl}/?error=google_sign_in_failed`);
   }
 });
 
