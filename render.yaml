@@ -3,7 +3,7 @@ services:
     name: aegisdisposal-backend
     env: node
     plan: free
-    buildCommand: npm ci --include=dev
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
