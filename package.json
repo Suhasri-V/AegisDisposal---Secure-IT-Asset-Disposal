@@ -12,6 +12,7 @@
     "admin:hash": "tsx server/setupAdmin.ts",
     "test": "tsx tests/api.test.ts",
     "build": "vite build",
+    "start": "tsx server/index.ts",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
   },

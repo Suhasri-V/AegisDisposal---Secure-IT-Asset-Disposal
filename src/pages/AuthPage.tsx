@@ -247,7 +247,10 @@ export const AuthPage: React.FC = () => {
                 <button
                   id="google-signin-btn"
                   type="button"
-                  onClick={() => window.location.assign('/api/auth/google')}
+                  onClick={() => {
+                    const apiBase = (import.meta.env.VITE_API_URL ? (import.meta.env.VITE_API_URL as string).replace(/\/$/, '') : '');
+                    window.location.assign(`${apiBase}/api/auth/google`);
+                  }}
                   className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-700 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
