@@ -22,7 +22,9 @@ import {
   INITIAL_CERTIFICATES,
 } from '../../src/data/initialData';
 
-const DATA_DIR = path.resolve(process.cwd(), 'server', 'data');
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.resolve(process.cwd(), 'server', 'data');
 
 function ensureDataDir(): void {
   if (!fs.existsSync(DATA_DIR)) {

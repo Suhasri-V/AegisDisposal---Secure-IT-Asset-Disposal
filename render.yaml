@@ -2,14 +2,20 @@ services:
   - type: web
     name: aegisdisposal-backend
     env: node
-    plan: free
-    buildCommand: npm install
+    plan: starter
+    buildCommand: npm ci
     startCommand: npm run start
+    disk:
+      name: aegisdisposal-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+      - key: DATA_DIR
+        value: /var/data
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
