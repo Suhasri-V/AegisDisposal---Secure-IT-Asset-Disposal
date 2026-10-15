@@ -1,0 +1,65 @@
+[
+  {
+    "id": "RULE-01",
+    "name": "Chain of Custody & Ownership Verification",
+    "category": "Asset Disposal Policy",
+    "description": "Verify asset serial number, custodian custody release form, and de-registration from enterprise MDM/Active Directory.",
+    "standardReference": "ISO 27001 Annex A.8.10 / NIST CSF PR.DS-3",
+    "mandatory": true,
+    "active": true
+  },
+  {
+    "id": "RULE-02",
+    "name": "Authorized Executive & Security Approval",
+    "category": "Asset Disposal Policy",
+    "description": "Formal sign-off by IT Manager and Information Security Officer prior to sanitization initiation.",
+    "standardReference": "NIST SP 800-88 Rev 1 Sec 2.4",
+    "mandatory": true,
+    "active": true
+  },
+  {
+    "id": "RULE-03",
+    "name": "Certified Sanitization Standard Execution",
+    "category": "Secure Data Destruction",
+    "description": "All logical media must undergo NIST 800-88 Purge/Clear or Cryptographic Erasure with zero raw sector residual data.",
+    "standardReference": "NIST SP 800-88 Rev 1 / DoD 5220.22-M",
+    "mandatory": true,
+    "active": true
+  },
+  {
+    "id": "RULE-04",
+    "name": "Independent Sanitization Verification",
+    "category": "Secure Data Destruction",
+    "description": "Zero-fill sector readback or hex verification performed by a certified technician distinct from the wiping initiator.",
+    "standardReference": "PCI-DSS v4.0 Req 9.8.2 / NIST SP 800-88",
+    "mandatory": true,
+    "active": true
+  },
+  {
+    "id": "RULE-05",
+    "name": "Tamper-Evident Destruction Certificate",
+    "category": "Audit Requirements",
+    "description": "Cryptographically signed Certificate of Sanitization with SHA-256 hash containing drive serial, sector count, and timestamp.",
+    "standardReference": "HIPAA Security Rule 45 CFR § 164.310(d)(2)(i)",
+    "mandatory": true,
+    "active": true
+  },
+  {
+    "id": "RULE-06",
+    "name": "R2v3 / e-Stewards Environmental Recycling Partner",
+    "category": "Environmental Disposal",
+    "description": "Post-sanitization physical recycling must route to a certified R2v3 or e-Stewards compliant down-stream recycler.",
+    "standardReference": "EPA IT Asset Lifecycle / R2v3 Standard",
+    "mandatory": false,
+    "active": true
+  },
+  {
+    "id": "RULE-07",
+    "name": "Seven-Year Immutable Audit Record Retention",
+    "category": "Record Retention",
+    "description": "All sanitization logs, technician signatures, and disposal approvals must be retained in tamper-proof storage.",
+    "standardReference": "SOX Section 802 / GDPR Art 17 Accountability",
+    "mandatory": true,
+    "active": true
+  }
+]

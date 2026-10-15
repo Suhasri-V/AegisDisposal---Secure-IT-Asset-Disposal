@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Disposal Request Approved",
+    "message": "Your decommission request for Dell Latitude 7420 (LAP-1002) was approved by AegisDisposal Administrator. Routed to sanitization clean-bay.",
+    "type": "success",
+    "assetId": "LAP-1002",
+    "linkPage": "disposal-requests",
+    "id": "NOTIF-303312",
+    "timestamp": "2026-10-15 12:21 am",
+    "read": false
+  },
+  {
+    "title": "Disposal Request Approved",
+    "message": "Your decommission request for Dell Latitude 7420 Pro (LAP-1016) was approved by AegisDisposal Administrator. Routed to sanitization clean-bay.",
+    "type": "success",
+    "assetId": "LAP-1016",
+    "linkPage": "disposal-requests",
+    "id": "NOTIF-018430",
+    "timestamp": "2026-10-15 12:16 am",
+    "read": false
+  },
+  {
+    "title": "Disposal Request Approved",
+    "message": "Your decommission request for apple ybb (LAP-1017) was approved by AegisDisposal Administrator. Routed to sanitization clean-bay.",
+    "type": "success",
+    "assetId": "LAP-1017",
+    "linkPage": "disposal-requests",
+    "id": "NOTIF-996797",
+    "timestamp": "2026-10-15 12:16 am",
+    "read": false
+  },
+  {
+    "title": "New Asset Decommission Request",
+    "message": "sudharsan u submitted disposal request for apple ybb (LAP-1017). Reason: End of Life / Deprecated",
+    "type": "warning",
+    "assetId": "LAP-1017",
+    "linkPage": "disposal-requests",
+    "id": "NOTIF-211367",
+    "timestamp": "2026-10-15 11:30 pm",
+    "read": false
+  },
+  {
+    "title": "New Asset Decommission Request",
+    "message": "Marcus Vance submitted disposal request for Dell Latitude 7420 Pro (LAP-1016). Reason: End of 3-year refresh lease cycle",
+    "type": "warning",
+    "assetId": "LAP-1016",
+    "linkPage": "disposal-requests",
+    "id": "NOTIF-545516",
+    "timestamp": "2026-10-15 09:55 pm",
+    "read": false
+  },
+  {
+    "id": "NOTIF-01",
+    "title": "Verification Failed Alert",
+    "message": "Drive HDD-3001 (Seagate Exos 16TB) failed sanitization verification due to I/O timeout. Action required.",
+    "timestamp": "2026-09-29 11:32 AM",
+    "type": "error",
+    "read": false,
+    "assetId": "HDD-3001",
+    "linkPage": "verification"
+  },
+  {
+    "id": "NOTIF-02",
+    "title": "New Disposal Request Pending Approval",
+    "message": "David K. Reynolds submitted a disposal request for Samsung Galaxy S22 (MOB-5002).",
+    "timestamp": "2026-09-29 08:46 AM",
+    "type": "info",
+    "read": false,
+    "assetId": "MOB-5002",
+    "linkPage": "disposal-requests"
+  },
+  {
+    "id": "NOTIF-03",
+    "title": "Sanitization Verification Pending",
+    "message": "Desktop DESK-2002 finished ATA Secure Erase and requires independent compliance verification.",
+    "timestamp": "2026-09-29 03:50 PM",
+    "type": "warning",
+    "read": false,
+    "assetId": "DESK-2002",
+    "linkPage": "verification"
+  },
+  {
+    "id": "NOTIF-04",
+    "title": "Certificate of Destruction Generated",
+    "message": "Official certificate CERT-WIPE-2026-90412 is ready for Samsung SSD-4001.",
+    "timestamp": "2026-09-22 11:36 AM",
+    "type": "success",
+    "read": true,
+    "assetId": "SSD-4001",
+    "linkPage": "certificates"
+  }
+]

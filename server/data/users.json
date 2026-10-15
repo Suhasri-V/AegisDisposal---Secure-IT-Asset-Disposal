@@ -1,0 +1,122 @@
+[
+  {
+    "id": "USR-00",
+    "name": "AegisDisposal Administrator",
+    "email": "admin@aegisdisposal.local",
+    "role": "Admin",
+    "department": "System Administration",
+    "status": "Active",
+    "lastLogin": "16/10/2026, 12:16:23 am",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-10-15T18:46:23.101Z",
+    "passwordHash": "$2b$12$K/JGczgFzldwcxDs4jZ9QOLnbIMUhTMii/PHkwRbA7Nl3fkJSKdXq"
+  },
+  {
+    "id": "USR-01",
+    "name": "Sarah Chen, CISSP",
+    "email": "sarah.chen@aegisdefense.io",
+    "role": "Manager",
+    "department": "Cybersecurity & Infrastructure",
+    "status": "Active",
+    "lastLogin": "2026-09-30 06:45 AM",
+    "passwordHash": "$2b$12$iPjbTeKth.oMsmceYO2Y0.dfMeYXe8vKJPGzGgEgY.jWnsvg2v9mG",
+    "createdAt": "2026-01-10T08:00:00Z",
+    "updatedAt": "2026-09-30T06:45:00Z"
+  },
+  {
+    "id": "USR-02",
+    "name": "Marcus Vance",
+    "email": "m.vance@aegisdefense.io",
+    "role": "User",
+    "department": "Hardware Operations",
+    "status": "Active",
+    "lastLogin": "16/10/2026, 12:10:00 am",
+    "passwordHash": "$2b$12$19akKZ.s/cUf6dLY5RPJhuQLN.uj3lzYXZos12zzSaOXc35KaM3ci",
+    "createdAt": "2026-01-15T09:30:00Z",
+    "updatedAt": "2026-10-15T18:40:00.510Z"
+  },
+  {
+    "id": "USR-03",
+    "name": "Elena Rostova, CISA",
+    "email": "elena.rostova@aegisdefense.io",
+    "role": "Compliance Officer",
+    "department": "Governance, Risk & Compliance",
+    "status": "Active",
+    "lastLogin": "2026-09-29 04:30 PM",
+    "passwordHash": "$2b$12$qxvZvtNkhbGISB.9rb.oyejTVnScAf7CvcPph1sEkD0sKn8vaX1Ey",
+    "createdAt": "2026-02-01T10:00:00Z",
+    "updatedAt": "2026-09-29T16:30:00Z"
+  },
+  {
+    "id": "USR-04",
+    "name": "David K. Reynolds",
+    "email": "d.reynolds@aegisdefense.io",
+    "role": "Manager",
+    "department": "Enterprise IT Services",
+    "status": "Active",
+    "lastLogin": "2026-09-30 05:20 AM",
+    "passwordHash": "$2b$12$Aujgbi8nmLrSxy6Jrjmmwe8GZ/I6MoaFBashx25vlxrJda7U1F8qe",
+    "createdAt": "2026-02-10T11:00:00Z",
+    "updatedAt": "2026-09-30T05:20:00Z"
+  },
+  {
+    "id": "USR-05",
+    "name": "Tanya Morales",
+    "email": "tanya.m@thirdpartyaudit.com",
+    "role": "Auditor",
+    "department": "External Assurance",
+    "status": "Active",
+    "lastLogin": "2026-09-28 02:15 PM",
+    "passwordHash": "$2b$12$nHB58zheRy9Z0XytMltecevIm7OrqZjlW1GASWR2wq.rPFeXrRWL6",
+    "createdAt": "2026-03-01T14:00:00Z",
+    "updatedAt": "2026-09-28T14:15:00Z"
+  },
+  {
+    "id": "USR-06",
+    "name": "Alex Taylor (Standard User)",
+    "email": "user@aegisdefense.io",
+    "role": "User",
+    "department": "Software Engineering",
+    "status": "Active",
+    "lastLogin": "2026-10-01 09:00 AM",
+    "passwordHash": "$2b$12$XgPU7vAYoom3e6wfzYZESOpcbFi7QsCSLSsyDiyH92NM7jOtMWB2y",
+    "createdAt": "2026-03-15T09:00:00Z",
+    "updatedAt": "2026-10-01T09:00:00Z"
+  },
+  {
+    "id": "USR-1BF7850EB9CC",
+    "name": "Google Standard User",
+    "email": "oauth-user@example.test",
+    "role": "User",
+    "department": "General Personnel",
+    "status": "Active",
+    "lastLogin": "15/10/2026, 9:55:44 pm",
+    "googleId": "google-standard-user-subject",
+    "createdAt": "2026-10-15T16:25:44.398Z",
+    "updatedAt": "2026-10-15T16:25:44.409Z"
+  },
+  {
+    "id": "USR-5370",
+    "name": "Attacker Name",
+    "email": "attacker@evil.com",
+    "role": "User",
+    "department": "Security",
+    "status": "Active",
+    "lastLogin": "15/10/2026, 9:55:45 pm",
+    "passwordHash": "$2b$12$zJPPFLWdCwJiIqGlGHA/je23AR0RQeY20iTHMP/j2Bm9sAnL3DrVa",
+    "createdAt": "2026-10-15T16:25:45.371Z",
+    "updatedAt": "2026-10-15T16:25:45.402Z"
+  },
+  {
+    "id": "USR-1175",
+    "name": "sudharsan u",
+    "email": "sudharsan9001@gmail.com",
+    "role": "User",
+    "department": "sudharsan9001@gmail.com",
+    "status": "Active",
+    "lastLogin": "15/10/2026, 11:50:36 pm",
+    "passwordHash": "$2b$12$.LmI4Yd9VkEzDEP/lMZQH.snZhLMOPgCf5EQ3Ieib9Uns92hrukUe",
+    "createdAt": "2026-10-15T17:58:41.176Z",
+    "updatedAt": "2026-10-15T18:20:36.292Z"
+  }
+]

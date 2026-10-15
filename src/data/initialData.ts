@@ -10,10 +10,19 @@ import {
 
 export const INITIAL_USERS: User[] = [
   {
+    id: 'USR-00',
+    name: 'Administrator',
+    email: 'suhasi271426@gmail.com',
+    role: 'Admin',
+    department: 'System Administration',
+    status: 'Active',
+    lastLogin: 'Never',
+  },
+  {
     id: 'USR-01',
     name: 'Sarah Chen, CISSP',
     email: 'sarah.chen@aegisdefense.io',
-    role: 'Admin',
+    role: 'Manager',
     department: 'Cybersecurity & Infrastructure',
     status: 'Active',
     lastLogin: '2026-09-30 06:45 AM',
@@ -854,4 +863,6 @@ export const INITIAL_SETTINGS: OrganizationSettings = {
   recyclerLicenseNumber: 'EPA-R2V3-90812-VA',
   auditRetentionDays: 2555, // 7 years
   hashAlgorithm: 'SHA-256 (FIPS 180-4 Compliant)',
+  registrationEnabled: true,
+  publicRegistrationEnabled: true,
 };

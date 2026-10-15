@@ -143,8 +143,8 @@ export const AssetDetailPage: React.FC = () => {
 
             {asset.disposalStatus === 'Ready For Disposal' && !asset.certificateId && (
               <button
-                onClick={() => {
-                  const cert = generateCertificate(asset.id);
+                onClick={async () => {
+                  const cert = await generateCertificate(asset.id);
                   navigate('certificate-details', { certificateId: cert.certificateId });
                 }}
                 className="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 transition-colors text-xs flex items-center gap-1.5 shadow-sm"
@@ -433,8 +433,8 @@ export const AssetDetailPage: React.FC = () => {
                     Awaiting final legal Certificate of Destruction issuance and authorized officer sign-off.
                   </p>
                   <button
-                    onClick={() => {
-                      const cert = generateCertificate(asset.id);
+                    onClick={async () => {
+                      const cert = await generateCertificate(asset.id);
                       navigate('certificate-details', { certificateId: cert.certificateId });
                     }}
                     className="px-3 py-1.5 rounded bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 text-xs"

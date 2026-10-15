@@ -101,8 +101,8 @@ export const DisposalRequestsPage: React.FC<DisposalRequestsPageProps> = ({
               New Disposal Request
             </button>
             {!isAuthorizedApprover && (
-              <span className="text-[11px] text-amber-400/90 bg-amber-950/40 border border-amber-800/40 px-2 py-1 rounded">
-                Logged in as {currentUser.role} (Switch to Admin/Manager to approve)
+              <span className="text-[11px] text-slate-400 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg font-mono">
+                Personnel Portal · Viewing Requests
               </span>
             )}
           </div>
@@ -240,22 +240,28 @@ export const DisposalRequestsPage: React.FC<DisposalRequestsPageProps> = ({
 
                     <td className="py-3 px-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       {asset.disposalStatus === 'Pending Approval' ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => approveDisposal(asset.id)}
-                            className="px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 text-[11px] transition-colors"
-                            title="Approve Disposal Request"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => setRejectingAssetId(asset.id)}
-                            className="px-2 py-1 rounded bg-rose-950/40 text-rose-300 hover:bg-rose-900/50 border border-rose-800/50 text-[11px]"
-                            title="Reject Request"
-                          >
-                            Reject
-                          </button>
-                        </div>
+                        isAuthorizedApprover ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => approveDisposal(asset.id)}
+                              className="px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 text-[11px] transition-colors"
+                              title="Approve Disposal Request"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => setRejectingAssetId(asset.id)}
+                              className="px-2 py-1 rounded bg-rose-950/40 text-rose-300 hover:bg-rose-900/50 border border-rose-800/50 text-[11px]"
+                              title="Reject Request"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-amber-400 font-mono px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                            Awaiting Approval
+                          </span>
+                        )
                       ) : (
                         <button
                           onClick={() => onSelectAsset(asset)}

@@ -33,7 +33,7 @@ export const AssetsPage: React.FC<AssetsPageProps> = ({
   onRequestDisposal,
   onOpenNewAssetModal,
 }) => {
-  const { assets } = useApp();
+  const { assets, currentUser } = useApp();
   const { pageStates, setPageState } = useNav();
 
   const [search, setSearch] = useState(pageStates.assets?.search ?? '');
@@ -327,13 +327,18 @@ export const AssetsPage: React.FC<AssetsPageProps> = ({
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
-                        <button
-                          onClick={() => onEditAsset(asset)}
-                          className="p-1.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700"
-                          title="Edit Asset"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
+                        {(currentUser.role === 'Admin' ||
+                          (asset.disposalStatus === 'Active' &&
+                            (asset.userId === currentUser.id ||
+                              asset.assignedEmployee.toLowerCase() === currentUser.name.toLowerCase()))) && (
+                          <button
+                            onClick={() => onEditAsset(asset)}
+                            className="p-1.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700"
+                            title="Edit Asset"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         {asset.disposalStatus === 'Active' && (
                           <button
                             onClick={() => onRequestDisposal(asset)}

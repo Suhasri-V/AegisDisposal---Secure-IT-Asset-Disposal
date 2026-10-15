@@ -34,7 +34,7 @@ export type WipingMethod =
 
 export type Priority = 'Urgent' | 'High' | 'Medium' | 'Low';
 
-export type UserRole = 'Admin' | 'IT Technician' | 'Compliance Officer' | 'Manager' | 'Auditor';
+export type UserRole = 'Admin' | 'User' | 'IT Technician' | 'Compliance Officer' | 'Manager' | 'Auditor';
 
 export interface User {
   id: string;
@@ -45,6 +45,11 @@ export interface User {
   status: 'Active' | 'Inactive';
   lastLogin: string;
   avatar?: string;
+  passwordHash?: string;
+  passwordSalt?: string;
+  googleId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ITAsset {
@@ -54,6 +59,7 @@ export interface ITAsset {
   model: string;
   serialNumber: string;
   assignedEmployee: string;
+  userId?: string;
   department: string;
   location: string;
   purchaseDate: string;
@@ -178,4 +184,6 @@ export interface OrganizationSettings {
   recyclerLicenseNumber: string;
   auditRetentionDays: number;
   hashAlgorithm: string;
+  registrationEnabled?: boolean;
+  publicRegistrationEnabled?: boolean;
 }

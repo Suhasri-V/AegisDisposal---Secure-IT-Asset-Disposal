@@ -1,0 +1,12 @@
+{
+  "orgName": "Aegis Defense Systems Global LLC",
+  "facilityName": "SecOps Sanitization Bay & Data Vault (Ashburn DC)",
+  "complianceLeadEmail": "compliance@aegisdefense.io",
+  "defaultWipingStandard": "NIST 800-88 Rev 1 Purge",
+  "certifiedRecyclerPartner": "EcoSanitize R2v3 Certified Recyclers Inc.",
+  "recyclerLicenseNumber": "EPA-R2V3-90812-VA",
+  "auditRetentionDays": 2555,
+  "hashAlgorithm": "SHA-256 (FIPS 180-4 Compliant)",
+  "registrationEnabled": true,
+  "publicRegistrationEnabled": true
+}

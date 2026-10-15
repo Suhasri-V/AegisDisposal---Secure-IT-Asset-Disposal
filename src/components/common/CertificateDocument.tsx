@@ -17,10 +17,10 @@ interface CertificateDocumentProps {
   asset?: ITAsset | null;
 }
 
-export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
+export const CertificateDocument = React.forwardRef<HTMLDivElement, CertificateDocumentProps>(({
   certificate,
   asset,
-}) => {
+}, ref) => {
   const verificationDate = asset?.verificationDate || certificate.issueDate;
   const disposalDate = asset?.finalDisposalDate || asset?.requestedDate || certificate.issueDate;
   const verificationResult = asset?.verificationResult
@@ -28,7 +28,7 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
     : 'PASSED — Sanitization & Readback Verified';
 
   return (
-    <div className="certificate-print-document bg-slate-900 border-2 border-emerald-500/40 rounded-xl p-6 sm:p-8 relative overflow-hidden shadow-2xl space-y-5 print:shadow-none print:rounded-none">
+    <div ref={ref} className="certificate-print-document bg-slate-900 border-2 border-emerald-500/40 rounded-xl p-6 sm:p-8 relative overflow-hidden shadow-2xl space-y-5 print:shadow-none print:rounded-none">
       {/* Subtle Security Background Watermark */}
       <div className="print-watermark absolute inset-0 pointer-events-none opacity-5 flex items-center justify-center">
         <ShieldCheck className="w-80 h-80 text-emerald-400" />
@@ -134,7 +134,7 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
             </div>
             <div>
               <span className="text-[10px] text-slate-500 print-muted-text block">Facility Location</span>
-              <span className="text-slate-200 print-dark-text truncate block">{certificate.facilityLocation || 'SecOps Bay 2'}</span>
+              <span className="text-slate-200 print-dark-text break-words block">{certificate.facilityLocation || 'SecOps Bay 2'}</span>
             </div>
           </div>
         </div>
@@ -219,4 +219,6 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
       </div>
     </div>
   );
-};
+});
+
+CertificateDocument.displayName = 'CertificateDocument';

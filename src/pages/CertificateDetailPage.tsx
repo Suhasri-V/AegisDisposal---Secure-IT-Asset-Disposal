@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Printer,
   Download,
@@ -8,6 +8,7 @@ import { useApp } from '../context/AppContext';
 import { useNav } from '../context/NavigationContext';
 import { BackButton } from '../components/common/BackButton';
 import { CertificateDocument } from '../components/common/CertificateDocument';
+import { downloadCertificatePng } from '../components/common/downloadCertificatePng';
 
 export const CertificateDetailPage: React.FC = () => {
   const { certificates, assets } = useApp();
@@ -16,6 +17,8 @@ export const CertificateDetailPage: React.FC = () => {
   const certificateId = currentParams.certificateId || (certificates[0] ? certificates[0].certificateId : '');
   const cert = certificates.find((c) => c.certificateId === certificateId) || certificates[0];
   const asset = cert ? assets.find((a) => a.id === cert.assetId) : null;
+  const certificateElementRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Auto-print support if navigating with autoPrint parameter
   useEffect(() => {
@@ -40,61 +43,19 @@ export const CertificateDetailPage: React.FC = () => {
     window.print();
   };
 
-  const handleDownload = () => {
-    const certText = `
-================================================================================
-                    OFFICIAL CERTIFICATE OF DATA DESTRUCTION
-                         AEGIS DISPOSAL & SANITIZATION
-================================================================================
+  const handleDownload = async () => {
+    const certificateElement = certificateElementRef.current
+      || document.querySelector<HTMLElement>('.certificate-print-document');
+    if (!certificateElement || isDownloading) return;
 
-CERTIFICATE ID:   ${cert.certificateId}
-DATE OF ISSUANCE: ${cert.issueDate}
-STATUS:           ${cert.status.toUpperCase()}
-SANCTIONING BODY: ${cert.organization}
-FACILITY:         ${cert.facilityLocation}
-
---------------------------------------------------------------------------------
-1. TARGET HARDWARE IDENTIFICATION
---------------------------------------------------------------------------------
-Asset ID:         ${cert.assetId}
-Device Category:  ${cert.deviceType}
-Brand & Model:    ${cert.brand} ${cert.model}
-Serial Number:    ${cert.serialNumber}
-Disposal Date:    ${asset?.finalDisposalDate || asset?.requestedDate || cert.issueDate}
-
---------------------------------------------------------------------------------
-2. SANITIZATION METHODOLOGY & STANDARDS
---------------------------------------------------------------------------------
-Standard:         ${cert.sanitizationMethod}
-Sanitization Rig: ${cert.wipingTool}
-Compliance Level: NIST SP 800-88 Rev 1 Purge & FIPS 140-3
-Technician:       ${cert.technicianName}
-Verification Off: ${cert.verificationOfficer}
-Verification Date:${asset?.verificationDate || cert.issueDate}
-Result:           ${asset?.verificationResult || 'Passed - Sanitized'}
-
---------------------------------------------------------------------------------
-3. CRYPTOGRAPHIC PROOF OF SANITIZATION
---------------------------------------------------------------------------------
-SHA-256 Record Hash:
-${cert.sha256Hash}
-
-Notes & Attestation:
-${cert.notes}
-
-"This document certifies that the aforementioned IT asset has been sanitized in
-compliance with strict information security standards. No residual user data,
-cryptographic key material, or partition table remains recoverable."
-================================================================================
-`;
-
-    const blob = new Blob([certText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${cert.certificateId}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    setIsDownloading(true);
+    try {
+      await downloadCertificatePng(certificateElement, cert.certificateId);
+    } catch (error) {
+      console.error('Failed to download certificate PNG:', error);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -118,11 +79,12 @@ cryptographic key material, or partition table remains recoverable."
           <div className="flex items-center gap-2">
             <button
               onClick={handleDownload}
+              disabled={isDownloading}
               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Download text dossier"
+              title="Download certificate PNG"
             >
               <Download className="w-3.5 h-3.5 text-cyan-400" />
-              Download Cert
+              {isDownloading ? 'Preparing PNG...' : 'Download Cert'}
             </button>
             <button
               onClick={handlePrint}
@@ -136,7 +98,7 @@ cryptographic key material, or partition table remains recoverable."
         </div>
 
         {/* Dedicated Print-Friendly Certificate Layout */}
-        <CertificateDocument certificate={cert} asset={asset} />
+        <CertificateDocument ref={certificateElementRef} certificate={cert} asset={asset} />
       </div>
     </div>
   );

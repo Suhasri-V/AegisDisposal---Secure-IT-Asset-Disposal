@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { NavigationProvider, useNav, AppRoute } from './context/NavigationContext';
 import { Sidebar, PageId } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
+import { AuthPage } from './pages/AuthPage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
 
 // Primary Pages
 import { DashboardPage } from './pages/DashboardPage';
@@ -24,6 +26,9 @@ import { AssetDetailPage } from './pages/AssetDetailPage';
 import { DisposalRequestCreatePage } from './pages/DisposalRequestCreatePage';
 import { ReportDetailPage } from './pages/ReportDetailPage';
 import { CertificateDetailPage } from './pages/CertificateDetailPage';
+import { UserDashboardPage } from './pages/UserDashboardPage';
+import { UserProfilePage } from './pages/UserProfilePage';
+import { UnauthorizedPage } from './pages/UnauthorizedPage';
 
 // Modals
 import { AssetModal } from './components/modals/AssetModal';
@@ -34,8 +39,36 @@ import { CertificateModal } from './components/modals/CertificateModal';
 import { ITAsset, CertificateOfDestruction } from './types';
 
 const AppContent: React.FC = () => {
-  const { assets, certificates, generateCertificate } = useApp();
+  const {
+    assets,
+    certificates,
+    generateCertificate,
+    isAuthenticated,
+    hasPermission,
+    currentUser,
+    completeGoogleLogin,
+  } = useApp();
   const { currentPage, navigate } = useNav();
+  const isAdminUser = currentUser.role === 'Admin';
+  const [oauthStatus, setOAuthStatus] = useState('Completing Google sign-in...');
+
+  useEffect(() => {
+    if (!window.location.hash.startsWith('#/oauth/callback')) return;
+
+    const queryIndex = window.location.hash.indexOf('?');
+    const params = new URLSearchParams(queryIndex >= 0 ? window.location.hash.slice(queryIndex + 1) : '');
+    const token = params.get('token');
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+
+    if (!token) {
+      setOAuthStatus('Google sign-in did not return a session. Please try again.');
+      return;
+    }
+
+    void completeGoogleLogin(token).then((result) => {
+      if (!result.ok) setOAuthStatus(result.message || 'Unable to complete Google sign-in.');
+    });
+  }, [completeGoogleLogin]);
 
   // Modal control states for creation & quick actions
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
@@ -74,14 +107,26 @@ const AppContent: React.FC = () => {
     navigate('certificate-details', { certificateId: certId }, `Certificate ${certId}`);
   };
 
-  const handleGenerateCertificate = (asset: ITAsset) => {
+  const handleGenerateCertificate = async (asset: ITAsset) => {
     try {
-      const newCert = generateCertificate(asset.id);
+      const newCert = await generateCertificate(asset.id);
       navigate('certificate-details', { certificateId: newCert.certificateId }, `Certificate ${newCert.certificateId}`);
     } catch (e) {
       console.error(e);
     }
   };
+
+  if (!isAuthenticated) {
+    if (window.location.hash.startsWith('#/oauth/callback')) {
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+          <p role="status" className="text-sm text-slate-300">{oauthStatus}</p>
+        </div>
+      );
+    }
+    if (window.location.pathname === '/admin/login') return <AdminLoginPage />;
+    return <AuthPage />;
+  }
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-hidden">
@@ -104,12 +149,23 @@ const AppContent: React.FC = () => {
         <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
           <div className="max-w-7xl mx-auto space-y-6">
             {currentPage === 'dashboard' && (
-              <DashboardPage
-                onNavigate={(page: PageId) => navigate(page)}
-                onSelectAsset={handleSelectAsset}
-                onOpenNewAssetModal={handleOpenAddAsset}
-              />
+              isAdminUser ? (
+                <DashboardPage
+                  onNavigate={(page: PageId) => navigate(page)}
+                  onSelectAsset={handleSelectAsset}
+                  onOpenNewAssetModal={handleOpenAddAsset}
+                />
+              ) : currentUser.role === 'User' ? (
+                <UserDashboardPage
+                  onSelectAsset={handleSelectAsset}
+                  onOpenNewAssetModal={handleOpenAddAsset}
+                />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator" attemptedPage="Admin Dashboard" />
+              )
             )}
+
+            {currentPage === 'profile' && <UserProfilePage />}
 
             {currentPage === 'assets' && (
               <AssetsPage
@@ -132,24 +188,36 @@ const AppContent: React.FC = () => {
             {currentPage === 'disposal-request' && <DisposalRequestCreatePage />}
 
             {currentPage === 'data-wiping' && (
-              <DataWipingPage
-                onSelectAsset={handleSelectAsset}
-                onOpenWipingModal={handleOpenWiping}
-              />
+              hasPermission(['Admin', 'IT Technician']) ? (
+                <DataWipingPage
+                  onSelectAsset={handleSelectAsset}
+                  onOpenWipingModal={handleOpenWiping}
+                />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator or IT Technician" attemptedPage="Data Wiping Station" />
+              )
             )}
 
             {currentPage === 'verification' && (
-              <VerificationPage
-                onSelectAsset={handleSelectAsset}
-                onOpenWipingModal={handleOpenWiping}
-              />
+              hasPermission(['Admin', 'Compliance Officer']) ? (
+                <VerificationPage
+                  onSelectAsset={handleSelectAsset}
+                  onOpenWipingModal={handleOpenWiping}
+                />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator or Verification Officer" attemptedPage="Sanitization Verification" />
+              )
             )}
 
             {currentPage === 'compliance' && (
-              <CompliancePage
-                onSelectAsset={handleSelectAsset}
-                onGenerateCertificate={handleGenerateCertificate}
-              />
+              hasPermission(['Admin', 'Compliance Officer', 'Auditor']) ? (
+                <CompliancePage
+                  onSelectAsset={handleSelectAsset}
+                  onGenerateCertificate={handleGenerateCertificate}
+                />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator or Compliance Officer" attemptedPage="Compliance Matrix" />
+              )
             )}
 
             {currentPage === 'certificates' && (
@@ -164,9 +232,21 @@ const AppContent: React.FC = () => {
 
             {currentPage === 'certificate-details' && <CertificateDetailPage />}
 
-            {currentPage === 'audit-logs' && <AuditLogsPage />}
+            {currentPage === 'audit-logs' && (
+              hasPermission(['Admin', 'Auditor', 'Compliance Officer']) ? (
+                <AuditLogsPage />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator or Auditor" attemptedPage="Audit Logs Ledger" />
+              )
+            )}
 
-            {currentPage === 'reports' && <ReportsPage />}
+            {currentPage === 'reports' && (
+              hasPermission(['Admin', 'Auditor', 'Manager', 'Compliance Officer']) ? (
+                <ReportsPage />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator or Manager" attemptedPage="Executive Reports" />
+              )
+            )}
 
             {currentPage === 'report-details' && <ReportDetailPage />}
 
@@ -178,9 +258,21 @@ const AppContent: React.FC = () => {
               <NotificationsPage onNavigate={(page: PageId) => navigate(page)} />
             )}
 
-            {currentPage === 'user-management' && <UserManagementPage />}
+            {currentPage === 'user-management' && (
+              isAdminUser ? (
+                <UserManagementPage />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator" attemptedPage="Personnel & RBAC Directory" />
+              )
+            )}
 
-            {currentPage === 'settings' && <SettingsPage />}
+            {currentPage === 'settings' && (
+              isAdminUser ? (
+                <SettingsPage />
+              ) : (
+                <UnauthorizedPage requiredRole="Administrator" attemptedPage="Platform Governance Settings" />
+              )
+            )}
           </div>
         </main>
       </div>

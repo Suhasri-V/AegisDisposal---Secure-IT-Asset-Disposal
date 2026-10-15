@@ -273,11 +273,11 @@ export const UserManagementPage: React.FC = () => {
                   onChange={(e) => setRole(e.target.value as UserRole)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-md p-2 text-slate-200 focus:outline-none focus:border-cyan-500"
                 >
-                  <option value="Admin">Admin (Full System Access)</option>
                   <option value="IT Technician">IT Technician (Wiping Execution)</option>
                   <option value="Compliance Officer">Compliance Officer (Verification Sign-off)</option>
                   <option value="Manager">Manager (Disposal Authorization)</option>
                   <option value="Auditor">Auditor (Read-only Compliance Review)</option>
+                  <option value="User">Standard User</option>
                 </select>
               </div>
 

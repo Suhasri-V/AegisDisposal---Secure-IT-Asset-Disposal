@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Award,
   Search,
@@ -13,6 +13,8 @@ import {
 import { useApp } from '../context/AppContext';
 import { useNav } from '../context/NavigationContext';
 import { BackButton } from '../components/common/BackButton';
+import { CertificateDocument } from '../components/common/CertificateDocument';
+import { downloadCertificatePng } from '../components/common/downloadCertificatePng';
 import { CertificateOfDestruction, ITAsset } from '../types';
 
 interface CertificatesPageProps {
@@ -24,9 +26,36 @@ export const CertificatesPage: React.FC<CertificatesPageProps> = ({
   onViewCertificateModal,
   onSelectAsset,
 }) => {
-  const { certificates, assets, generateCertificate } = useApp();
+  const { certificates, assets, generateCertificate, currentUser } = useApp();
   const { navigate } = useNav();
+  const canGenerate = currentUser.role === 'Admin' || currentUser.role === 'Compliance Officer';
   const [search, setSearch] = useState('');
+  const [downloadTarget, setDownloadTarget] = useState<{
+    certificate: CertificateOfDestruction;
+    asset?: ITAsset;
+  } | null>(null);
+  const downloadElementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!downloadTarget || !downloadElementRef.current) return;
+
+    let cancelled = false;
+    const timeoutId = window.setTimeout(() => {
+      const element = downloadElementRef.current;
+      if (!element) return;
+
+      void downloadCertificatePng(element, downloadTarget.certificate.certificateId)
+        .catch((error) => console.error('Failed to download certificate PNG:', error))
+        .finally(() => {
+          if (!cancelled) setDownloadTarget(null);
+        });
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [downloadTarget]);
 
   // Assets that are ready for a certificate but don't have one yet
   const readyForCertAssets = assets.filter(
@@ -92,8 +121,8 @@ export const CertificatesPage: React.FC<CertificatesPageProps> = ({
         </div>
       </div>
 
-      {/* Assets Ready for Certificate Alert/Action Bar */}
-      {readyForCertAssets.length > 0 && (
+      {/* Assets Ready for Certificate Alert/Action Bar (Admin / Compliance Officer only) */}
+      {canGenerate && readyForCertAssets.length > 0 && (
         <div className="p-3.5 rounded-lg bg-emerald-950/20 border border-emerald-800/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-emerald-300">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
@@ -105,8 +134,8 @@ export const CertificatesPage: React.FC<CertificatesPageProps> = ({
             {readyForCertAssets.map((asset) => (
               <button
                 key={asset.id}
-                onClick={() => {
-                  const cert = generateCertificate(asset.id);
+                onClick={async () => {
+                  const cert = await generateCertificate(asset.id);
                   onViewCertificateModal(cert, asset);
                 }}
                 className="px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 text-[11px] font-mono transition-colors"
@@ -209,9 +238,14 @@ export const CertificatesPage: React.FC<CertificatesPageProps> = ({
                             <Printer className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => onViewCertificateModal(cert, matchedAsset)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setDownloadTarget({ certificate: cert, asset: matchedAsset });
+                            }}
+                            disabled={downloadTarget?.certificate.certificateId === cert.certificateId}
                             className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px]"
-                            title="Download Certificate"
+                            title="Download Certificate PNG"
+                            aria-label={`Download Certificate ${cert.certificateId} as PNG`}
                           >
                             <Download className="w-3.5 h-3.5" />
                           </button>
@@ -225,6 +259,25 @@ export const CertificatesPage: React.FC<CertificatesPageProps> = ({
           </table>
         </div>
       </div>
+      {downloadTarget && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            left: '-10000px',
+            top: 0,
+            width: '1000px',
+            pointerEvents: 'none',
+            zIndex: -1,
+          }}
+        >
+          <CertificateDocument
+            ref={downloadElementRef}
+            certificate={downloadTarget.certificate}
+            asset={downloadTarget.asset}
+          />
+        </div>
+      )}
     </div>
   );
 };

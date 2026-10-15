@@ -1,0 +1,154 @@
+[
+  {
+    "id": "WIPE-1003",
+    "assetId": "DESK-2001",
+    "wipingMethod": "NIST 800-88 Rev 1 Purge",
+    "wipingTool": "Blancco Drive Eraser Enterprise v7.4",
+    "technician": "Marcus Vance",
+    "startTime": "2026-09-30 06:30 AM",
+    "passes": 3,
+    "status": "In Progress",
+    "logs": [
+      "Initializing target device CZC019842M...",
+      "Applied sanitization pattern: NIST 800-88 Rev 1 Purge",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1004",
+    "assetId": "DESK-2002",
+    "wipingMethod": "ATA Secure Erase",
+    "wipingTool": "BitRaser Pro SecureSanitize",
+    "technician": "Marcus Vance",
+    "startTime": "2026-09-29 02:00 PM",
+    "endTime": "2026-09-29 03:45 PM",
+    "passes": 1,
+    "status": "Completed",
+    "logs": [
+      "[14:00:02] Initiated ATA Secure Erase on /dev/nvme0n1",
+      "[14:05:18] Firmware level purge command accepted",
+      "[14:45:00] All 500,118,192 blocks overwritten with 0x00 pattern",
+      "[15:45:10] Controller reported SUCCESS (0 error sectors)"
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1005",
+    "assetId": "HDD-3001",
+    "wipingMethod": "DoD 5220.22-M (3-Pass)",
+    "wipingTool": "DBAN Enterprise AutoWipe",
+    "technician": "Marcus Vance",
+    "startTime": "2026-09-28 09:00 AM",
+    "endTime": "2026-09-28 07:30 PM",
+    "passes": 3,
+    "status": "Failed",
+    "logs": [
+      "Initializing target device ZJV2M90K...",
+      "Applied sanitization pattern: DoD 5220.22-M (3-Pass)",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1006",
+    "assetId": "HDD-3002",
+    "wipingMethod": "NIST 800-88 Rev 1 Purge",
+    "wipingTool": "Blancco Drive Eraser Enterprise v7.4",
+    "technician": "Marcus Vance",
+    "startTime": "2026-09-24 08:00 AM",
+    "endTime": "2026-09-25 04:00 AM",
+    "passes": 3,
+    "status": "Completed",
+    "logs": [
+      "Initializing target device 2GH89V1B...",
+      "Applied sanitization pattern: NIST 800-88 Rev 1 Purge",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1007",
+    "assetId": "SSD-4001",
+    "wipingMethod": "Cryptographic Erasure (Crypto Erase)",
+    "wipingTool": "Samsung Magician Enterprise CLI",
+    "technician": "Marcus Vance",
+    "startTime": "2026-09-22 09:00 AM",
+    "endTime": "2026-09-22 09:15 AM",
+    "passes": 1,
+    "status": "Completed",
+    "logs": [
+      "Initializing target device S67BNE0R90412A...",
+      "Applied sanitization pattern: Cryptographic Erasure (Crypto Erase)",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1008",
+    "assetId": "SSD-4002",
+    "wipingMethod": "NIST 800-88 Rev 1 Purge",
+    "wipingTool": "Blancco Drive Eraser Enterprise v7.4",
+    "technician": "Marcus Vance",
+    "startTime": "2026-08-15 01:00 PM",
+    "endTime": "2026-08-15 02:20 PM",
+    "passes": 1,
+    "status": "Completed",
+    "logs": [
+      "Initializing target device 2149M88210X...",
+      "Applied sanitization pattern: NIST 800-88 Rev 1 Purge",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1012",
+    "assetId": "SRV-7001",
+    "wipingMethod": "NIST 800-88 Rev 1 Purge",
+    "wipingTool": "Blancco Drive Eraser Enterprise v7.4",
+    "technician": "Marcus Vance",
+    "startTime": "2026-09-30 05:45 AM",
+    "passes": 3,
+    "status": "In Progress",
+    "logs": [
+      "Initializing target device 9B298Z20...",
+      "Applied sanitization pattern: NIST 800-88 Rev 1 Purge",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1013",
+    "assetId": "SRV-7002",
+    "wipingMethod": "NIST 800-88 Rev 1 Purge",
+    "wipingTool": "Blancco Drive Eraser Enterprise v7.4",
+    "technician": "Marcus Vance",
+    "startTime": "2026-09-14 08:00 AM",
+    "endTime": "2026-09-14 06:30 PM",
+    "passes": 3,
+    "status": "Completed",
+    "logs": [
+      "Initializing target device USE0199Z12...",
+      "Applied sanitization pattern: NIST 800-88 Rev 1 Purge",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  },
+  {
+    "id": "WIPE-1014",
+    "assetId": "SRV-7003",
+    "wipingMethod": "ATA Secure Erase",
+    "wipingTool": "BitRaser Pro SecureSanitize",
+    "technician": "Marcus Vance",
+    "startTime": "2026-08-05 09:00 AM",
+    "endTime": "2026-08-05 11:30 AM",
+    "passes": 1,
+    "status": "Completed",
+    "logs": [
+      "Initializing target device FCH2419V102...",
+      "Applied sanitization pattern: ATA Secure Erase",
+      "Verification pass confirmed zero residuals."
+    ],
+    "createdAt": "2026-09-22T09:00:00Z"
+  }
+]

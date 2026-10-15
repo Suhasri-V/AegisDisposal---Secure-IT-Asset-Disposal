@@ -1,0 +1,56 @@
+[
+  {
+    "id": "VER-1005",
+    "assetId": "HDD-3001",
+    "verifiedBy": "Elena Rostova, CISA",
+    "verificationDate": "2026-09-29 11:30 AM",
+    "verificationResult": "Failed",
+    "verificationNotes": "Pass 3 failed at LBA 41298402 due to I/O read timeout on degraded platters. Recommending physical degaussing and shredding.",
+    "createdAt": "2026-09-23T14:00:00Z"
+  },
+  {
+    "id": "VER-1006",
+    "assetId": "HDD-3002",
+    "verifiedBy": "Elena Rostova, CISA",
+    "verificationDate": "2026-09-25 11:00 AM",
+    "verificationResult": "Passed",
+    "verificationNotes": "Complete hex readback confirmed 100% zero-fill across all sectors. Optical inspection intact.",
+    "createdAt": "2026-09-23T14:00:00Z"
+  },
+  {
+    "id": "VER-1007",
+    "assetId": "SSD-4001",
+    "verifiedBy": "Elena Rostova, CISA",
+    "verificationDate": "2026-09-22 11:30 AM",
+    "verificationResult": "Passed",
+    "verificationNotes": "Cryptographic key zeroization validated; random sector sampling reads as unrecoverable ciphertext.",
+    "createdAt": "2026-09-23T14:00:00Z"
+  },
+  {
+    "id": "VER-1008",
+    "assetId": "SSD-4002",
+    "verifiedBy": "Elena Rostova, CISA",
+    "verificationDate": "2026-08-16 10:00 AM",
+    "verificationResult": "Passed",
+    "verificationNotes": "Complete optical inspection and hex sector verification passed.",
+    "createdAt": "2026-09-23T14:00:00Z"
+  },
+  {
+    "id": "VER-1013",
+    "assetId": "SRV-7002",
+    "verifiedBy": "Elena Rostova, CISA",
+    "verificationDate": "2026-09-15 09:30 AM",
+    "verificationResult": "Passed",
+    "verificationNotes": "All 12 drives sanitized and verified. Zero unwritten clusters.",
+    "createdAt": "2026-09-23T14:00:00Z"
+  },
+  {
+    "id": "VER-1014",
+    "assetId": "SRV-7003",
+    "verifiedBy": "Elena Rostova, CISA",
+    "verificationDate": "2026-08-06 10:00 AM",
+    "verificationResult": "Passed",
+    "verificationNotes": "Complete optical inspection and hex sector verification passed.",
+    "createdAt": "2026-09-23T14:00:00Z"
+  }
+]

@@ -9,6 +9,7 @@ import {
 import { CertificateOfDestruction, ITAsset } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { CertificateDocument } from '../common/CertificateDocument';
+import { downloadCertificatePng } from '../common/downloadCertificatePng';
 
 interface CertificateModalProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   asset,
 }) => {
   const { finalizeDisposal, settings } = useApp();
+  const certificateElementRef = React.useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = React.useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -40,65 +43,23 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     window.print();
   };
 
-  const handleDownload = () => {
-    const certText = `
-================================================================================
-                    OFFICIAL CERTIFICATE OF DATA DESTRUCTION
-                         AEGIS DISPOSAL & SANITIZATION
-================================================================================
+  const handleDownload = async () => {
+    const certificateElement = certificateElementRef.current
+      || document.querySelector<HTMLElement>('.certificate-print-document');
+    if (!certificateElement || isDownloading) return;
 
-CERTIFICATE ID:   ${certificate.certificateId}
-DATE OF ISSUANCE: ${certificate.issueDate}
-STATUS:           ${certificate.status.toUpperCase()}
-SANCTIONING BODY: ${certificate.organization}
-FACILITY:         ${certificate.facilityLocation}
-
---------------------------------------------------------------------------------
-1. TARGET HARDWARE IDENTIFICATION
---------------------------------------------------------------------------------
-Asset ID:         ${certificate.assetId}
-Device Category:  ${certificate.deviceType}
-Brand & Model:    ${certificate.brand} ${certificate.model}
-Serial Number:    ${certificate.serialNumber}
-Disposal Date:    ${asset?.finalDisposalDate || asset?.requestedDate || certificate.issueDate}
-
---------------------------------------------------------------------------------
-2. SANITIZATION METHODOLOGY & STANDARDS
---------------------------------------------------------------------------------
-Standard:         ${certificate.sanitizationMethod}
-Sanitization Rig: ${certificate.wipingTool}
-Compliance Level: NIST SP 800-88 Rev 1 Purge & FIPS 140-3
-Technician:       ${certificate.technicianName}
-Verification Off: ${certificate.verificationOfficer}
-Verification Date:${asset?.verificationDate || certificate.issueDate}
-Result:           ${asset?.verificationResult || 'Passed - Sanitized'}
-
---------------------------------------------------------------------------------
-3. CRYPTOGRAPHIC PROOF OF SANITIZATION
---------------------------------------------------------------------------------
-SHA-256 Record Hash:
-${certificate.sha256Hash}
-
-Notes & Attestation:
-${certificate.notes}
-
-"This document certifies that the aforementioned IT asset has been sanitized in
-compliance with strict information security standards. No residual user data,
-cryptographic key material, or partition table remains recoverable."
-================================================================================
-`;
-
-    const blob = new Blob([certText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${certificate.certificateId}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    setIsDownloading(true);
+    try {
+      await downloadCertificatePng(certificateElement, certificate.certificateId);
+    } catch (error) {
+      console.error('Failed to download certificate PNG:', error);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
       <div className="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-xl shadow-2xl overflow-hidden my-6">
         {/* Modal Top Control Bar (Hidden on print) */}
         <div className="px-6 py-3 border-b border-slate-800 bg-slate-950 flex items-center justify-between no-print print:hidden">
@@ -122,10 +83,11 @@ cryptographic key material, or partition table remains recoverable."
             </button>
             <button
               onClick={handleDownload}
+              disabled={isDownloading}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors text-xs border border-slate-700 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              Download Cert
+              {isDownloading ? 'Preparing PNG...' : 'Download Cert'}
             </button>
             <button
               onClick={onClose}
@@ -138,7 +100,7 @@ cryptographic key material, or partition table remains recoverable."
 
         {/* Certificate Printable Canvas */}
         <div className="p-4 sm:p-6 bg-slate-950">
-          <CertificateDocument certificate={certificate} asset={asset} />
+          <CertificateDocument ref={certificateElementRef} certificate={certificate} asset={asset} />
         </div>
 
         {/* Footer / Final Disposal Trigger (Hidden on print) */}
