@@ -8,6 +8,7 @@ const bcrypt = (await import('bcryptjs')).default;
 process.env.ADMIN_PASSWORD_HASH = await bcrypt.hash(TEST_ADMIN_PASSWORD, 12);
 const { default: app } = await import('../server/index');
 import { db } from '../server/db/store';
+import { provisionAdminAccount } from '../server/adminSetup';
 import http from 'http';
 
 interface TestResult {
@@ -36,6 +37,7 @@ async function runTestSuite() {
 
   // Reset database to ensure clean state
   db.resetToDemoData();
+  provisionAdminAccount();
   const testUser = db.getUserByEmail('m.vance@aegisdefense.io');
   if (!testUser) throw new Error('Test user seed is missing.');
   db.updateUser({ ...testUser, passwordHash: await bcrypt.hash(TEST_USER_PASSWORD, 12) });

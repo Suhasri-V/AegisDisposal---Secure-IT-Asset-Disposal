@@ -1,17 +1,19 @@
+
 import { initializeApp } from "firebase/app";
 import {
-    getAuth,
-    GoogleAuthProvider
+  getAuth,
+  GoogleAuthProvider
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "YOUR_ACTUAL_API_KEY",
-    authDomain: "aegisops-e0185.firebaseapp.com",
-    projectId: "aegisops-e0185",
-    storageBucket: "aegisops-e0185.firebasestorage.app",
-    messagingSenderId: "632309417742",
-    appId: "YOUR_ACTUAL_APP_ID"
+  apiKey: "AIzaSyBUsJy8cbL3uFaZkzw57DSiJlsApz_bepU",
+  authDomain: "aegisops-e0185.firebaseapp.com",
+  projectId: "aegisops-e0185",
+  storageBucket: "aegisops-e0185.firebasestorage.app",
+  messagingSenderId: "632309417742",
+  appId: "1:632309417742:web:067c85660ea1b6b662395f",
+  measurementId: "G-QSDFRGG4XK"
 };
 
 const app = initializeApp(firebaseConfig);

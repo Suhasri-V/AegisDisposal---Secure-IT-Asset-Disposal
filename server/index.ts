@@ -31,9 +31,14 @@ provisionAdminAccount();
 const allowedOrigins = new Set(
   [
     process.env.FRONTEND_URL?.trim().replace(/\/+$/, ''),
-    ...(process.env.NODE_ENV === 'production'
-      ? []
-      : ['http://localhost:3000', 'http://localhost:5173']),
+    'https://aegis-disposal-secure-it-asset-disp.vercel.app',
+    'https://aegis-disposal-secure-it-asset-disposal.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:4173',
   ].filter((origin): origin is string => Boolean(origin))
 );
 
@@ -43,7 +48,15 @@ app.use(
       // Allow requests with no origin (like mobile apps, curl, or server-to-server)
       if (!origin) return callback(null, true);
       const cleanOrigin = origin.replace(/\/+$/, '');
-      return callback(null, allowedOrigins.has(cleanOrigin));
+      if (
+        allowedOrigins.has(cleanOrigin) ||
+        cleanOrigin.endsWith('.vercel.app') ||
+        cleanOrigin.startsWith('http://localhost:') ||
+        cleanOrigin.startsWith('http://127.0.0.1:')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, false);
     },
     credentials: true,
   })

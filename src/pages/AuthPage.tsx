@@ -40,21 +40,43 @@ export const AuthPage: React.FC = () => {
     department: '',
   });
 
-  // Google OAuth availability — checked from the backend on mount
-  const [googleEnabled, setGoogleEnabled] = useState<boolean | null>(null); // null = checking
+  // Google OAuth availability — optimistic by default, verified in background
+  const [googleEnabled, setGoogleEnabled] = useState<boolean>(true);
+  const [isWakingBackend, setIsWakingBackend] = useState<boolean>(false);
   const [googleStatusMessage, setGoogleStatusMessage] = useState('');
 
   useEffect(() => {
-    api
-      .googleAuthStatus()
-      .then((res) => {
-        setGoogleEnabled(res.googleAuthEnabled);
-        setGoogleStatusMessage(res.message);
-      })
-      .catch(() => {
-        setGoogleEnabled(false);
-        setGoogleStatusMessage('Could not contact the authentication service. Please try again later.');
-      });
+    let isMounted = true;
+    let retryTimer: any;
+
+    const checkStatus = (retriesLeft = 3, delay = 2000) => {
+      api
+        .googleAuthStatus()
+        .then((res) => {
+          if (!isMounted) return;
+          setIsWakingBackend(false);
+          setGoogleEnabled(res.googleAuthEnabled);
+          setGoogleStatusMessage(res.message);
+        })
+        .catch(() => {
+          if (!isMounted) return;
+          if (retriesLeft > 0) {
+            setIsWakingBackend(true);
+            setGoogleStatusMessage('Connecting to authentication service…');
+            retryTimer = setTimeout(() => checkStatus(retriesLeft - 1, delay * 1.5), delay);
+          } else {
+            setIsWakingBackend(false);
+            setGoogleStatusMessage('');
+          }
+        });
+    };
+
+    checkStatus();
+
+    return () => {
+      isMounted = false;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
   }, []);
 
   const handleLogin = async (event: React.FormEvent) => {
@@ -239,58 +261,32 @@ export const AuthPage: React.FC = () => {
                 <span className="h-px flex-1 bg-slate-800" />
               </div>
 
-              {/* Google Sign-In — three states: checking / enabled / disabled */}
-              {googleEnabled === null ? (
-                /* Checking status */
-                <div className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-700 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-500 select-none">
-                  <span className="w-4 h-4 rounded-full border-2 border-slate-600 border-t-cyan-400 animate-spin inline-block" />
-                  Checking Google sign-in…
-                </div>
-              ) : googleEnabled ? (
-                /* OAuth configured — active button */
-                <button
-                  id="google-signin-btn"
-                  type="button"
-                  onClick={() => {
-                    window.location.assign(`${API_ORIGIN}/api/auth/google`);
-                  }}
-                  className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-700 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Continue with Google
-                </button>
-              ) : (
-                /* OAuth not configured — disabled with tooltip */
-                <div className="group relative">
-                  <button
-                    id="google-signin-btn-disabled"
-                    type="button"
-                    disabled
-                    aria-disabled="true"
-                    className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-700/50 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-slate-500 cursor-not-allowed select-none"
-                  >
-                    <span className="font-bold text-base text-slate-600" aria-hidden="true">G</span>
-                    Continue with Google
-                  </button>
-                  {/* Hover tooltip explaining the disabled state */}
-                  <div
-                    role="tooltip"
-                    className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex items-start gap-2 w-72 rounded-lg border border-amber-500/30 bg-slate-900 px-3 py-2.5 shadow-xl z-10"
-                  >
-                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-[11px] leading-relaxed text-slate-300">
-                      <span className="text-amber-400 font-semibold block mb-0.5">Google Sign-In not configured</span>
-                      {googleStatusMessage}
-                    </p>
-                  </div>
+              {/* Google Sign-In */}
+              <button
+                id="google-signin-btn"
+                type="button"
+                onClick={() => {
+                  window.location.assign(`${API_ORIGIN}/api/auth/google`);
+                }}
+                className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-700 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100 transition-colors shadow-sm"
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continue with Google
+              </button>
+
+              {isWakingBackend && (
+                <div className="mt-2 flex items-center justify-center gap-2 text-xs text-cyan-400 animate-pulse">
+                  <span className="w-2.5 h-2.5 rounded-full border border-cyan-400 border-t-transparent animate-spin inline-block" />
+                  <span>Connecting to authentication service…</span>
                 </div>
               )}
-              {googleEnabled === false && (
+
+              {!googleEnabled && googleStatusMessage && (
                 <p role="status" className="mt-2 text-center text-xs text-amber-300">
                   {googleStatusMessage}
                 </p>
