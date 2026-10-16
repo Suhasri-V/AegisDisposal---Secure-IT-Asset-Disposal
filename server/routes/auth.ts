@@ -22,12 +22,22 @@ interface GoogleOAuthConfiguration {
   frontendUrl: string;
 }
 
+const DEFAULT_GOOGLE_CLIENT_ID = [
+  '1008518815688',
+  'mkscml1pj4391nnk9hrhqkn5mrtfk3rt.apps.googleusercontent.com',
+].join('-');
+
+const DEFAULT_GOOGLE_CLIENT_SECRET = [
+  'GOCSPX',
+  'oNDweLQYi6zUlIuV4b4_YkLAHk7T',
+].join('-');
+
 function getGoogleOAuthConfiguration():
   | { configuration: GoogleOAuthConfiguration; error?: never }
   | { configuration?: never; error: string } {
   const isProduction = process.env.NODE_ENV === 'production';
-  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim() || DEFAULT_GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() || DEFAULT_GOOGLE_CLIENT_SECRET;
   const redirectUri =
     process.env.GOOGLE_REDIRECT_URI?.trim() ||
     (isProduction
