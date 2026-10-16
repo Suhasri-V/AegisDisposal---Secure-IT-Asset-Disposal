@@ -102,18 +102,25 @@ export const AuthPage: React.FC = () => {
       if (!res.ok) {
         setError(res.message || 'Unable to complete Google sign-in.');
       }
+      return;
     } catch (fbErr: any) {
       if (fbErr?.code === 'auth/popup-closed-by-user' || fbErr?.code === 'auth/cancelled-popup-request') {
         setIsGoogleLoading(false);
         return;
       }
-      console.warn('Firebase popup sign-in did not complete, falling back to server OAuth:', fbErr);
-      // 2. Fall back to backend OAuth redirect
-      const targetUrl = API_ORIGIN ? `${API_ORIGIN}/api/auth/google` : '/api/auth/google';
-      window.location.assign(targetUrl);
-    } finally {
-      setIsGoogleLoading(false);
+      console.warn('Firebase popup sign-in not completed, directing to Google OAuth:', fbErr);
     }
+
+    // 2. Direct Google OAuth 2.0 URL (never lands on an unhandled local or Vercel route)
+    const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    const redirectUri = isProduction
+      ? 'https://aegisdisposal-secure-it-asset-disposal.onrender.com/api/auth/google/callback'
+      : 'http://localhost:5000/api/auth/google/callback';
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=1008518815688-mkscml1pj4391nnk9hrhqkn5mrtfk3rt.apps.googleusercontent.com&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
+
+    window.location.assign(googleAuthUrl);
   };
 
   const handleLogin = async (event: React.FormEvent) => {
