@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"tsx server/index.ts\" \"vite --port=3000 --host=0.0.0.0\"",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"tsx server/index.ts\" \"vite --port=3000 --host=127.0.0.1\"",
     "dev:server": "tsx server/index.ts",
-    "dev:client": "vite --port=3000 --host=0.0.0.0",
+    "dev:client": "vite --port=3000 --host=127.0.0.1",
     "server": "tsx server/index.ts",
     "seed": "tsx server/seed.ts",
     "admin:hash": "tsx server/setupAdmin.ts",

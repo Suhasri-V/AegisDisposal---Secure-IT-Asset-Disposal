@@ -57,7 +57,21 @@ function atomicWriteJson<T>(filePath: string, data: T): void {
   const dir = path.dirname(filePath);
   const tmpPath = path.join(dir, `.${path.basename(filePath)}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`);
   fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
-  fs.renameSync(tmpPath, filePath);
+  try {
+    fs.renameSync(tmpPath, filePath);
+  } catch (err: any) {
+    if (err.code === 'EPERM' || err.code === 'EBUSY') {
+      try {
+        fs.copyFileSync(tmpPath, filePath);
+        fs.unlinkSync(tmpPath);
+      } catch {
+        // Fallback write directly
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+      }
+    } else {
+      throw err;
+    }
+  }
 }
 
 function writeJsonFile<T>(filename: string, data: T): void {

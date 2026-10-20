@@ -48,9 +48,11 @@ export const AdminLoginPage: React.FC = () => {
             </label>
             <input
               id="admin-email"
-              name="admin_email"
+              name="admin_email_manual"
               type="email"
-              autoComplete="off"
+              autoComplete="new-password"
+              autoCapitalize="none"
+              spellCheck={false}
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -64,7 +66,7 @@ export const AdminLoginPage: React.FC = () => {
             </label>
             <input
               id="admin-password"
-              name="admin_password"
+              name="admin_password_manual"
               type="password"
               autoComplete="new-password"
               required

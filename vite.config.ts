@@ -8,25 +8,7 @@ export default defineConfig(({mode}) => {
   const apiPort = process.env.PORT || env.PORT || '5000';
   const apiOrigin = process.env.API_ORIGIN || env.API_ORIGIN || `http://localhost:${apiPort}`;
   return {
-    plugins: [
-      react(),
-      tailwindcss(),
-      {
-        name: 'google-oauth-dev-handler',
-        configureServer(server) {
-          server.middlewares.use('/api/auth/google', (req, res, next) => {
-            if (req.url === '' || req.url === '/') {
-              const googleAuthUrl =
-                'https://accounts.google.com/o/oauth2/v2/auth?client_id=1008518815688-mkscml1pj4391nnk9hrhqkn5mrtfk3rt.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fapi%2Fauth%2Fgoogle%2Fcallback&response_type=code&scope=openid%20email%20profile&prompt=select_account';
-              res.writeHead(302, { Location: googleAuthUrl });
-              res.end();
-              return;
-            }
-            next();
-          });
-        },
-      },
-    ],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname, '.'),
@@ -34,7 +16,7 @@ export default defineConfig(({mode}) => {
     },
     server: {
       port: 3000,
-      host: '0.0.0.0',
+      host: '127.0.0.1',
       proxy: {
         '/api': {
           target: apiOrigin,

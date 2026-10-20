@@ -27,48 +27,57 @@ export const AssetModal: React.FC<AssetModalProps> = ({
   const [capacity, setCapacity] = useState(assetToEdit?.capacity || '512GB NVMe SSD');
   const [ipAddress, setIpAddress] = useState(assetToEdit?.ipAddress || '');
   const [macAddress, setMacAddress] = useState(assetToEdit?.macAddress || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     if (!brand || !model || !serialNumber || !assignedEmployee) {
-      alert('Please fill out all required fields (Brand, Model, Serial Number, Assigned Custodian)');
+      setSubmitError('Please fill out all required fields (Brand, Model, Serial Number, Assigned Custodian).');
       return;
     }
 
-    if (assetToEdit) {
-      updateAsset({
-        ...assetToEdit,
-        deviceType,
-        brand,
-        model,
-        serialNumber,
-        assignedEmployee,
-        department,
-        location,
-        purchaseDate,
-        capacity,
-        ipAddress,
-        macAddress,
-      });
-    } else {
-      addAsset({
-        deviceType,
-        brand,
-        model,
-        serialNumber,
-        assignedEmployee,
-        department,
-        location,
-        purchaseDate,
-        capacity,
-        ipAddress,
-        macAddress,
-      });
+    setIsSaving(true);
+    try {
+      if (assetToEdit) {
+        await updateAsset({
+          ...assetToEdit,
+          deviceType,
+          brand,
+          model,
+          serialNumber,
+          assignedEmployee,
+          department,
+          location,
+          purchaseDate,
+          capacity,
+          ipAddress,
+          macAddress,
+        });
+      } else {
+        await addAsset({
+          deviceType,
+          brand,
+          model,
+          serialNumber,
+          assignedEmployee,
+          department,
+          location,
+          purchaseDate,
+          capacity,
+          ipAddress,
+          macAddress,
+        });
+      }
+      onClose();
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Asset could not be saved. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
-
-    onClose();
   };
 
   return (
@@ -243,20 +252,28 @@ export const AssetModal: React.FC<AssetModalProps> = ({
             </p>
           </div>
 
+          {submitError && (
+            <p role="alert" className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+              {submitError}
+            </p>
+          )}
+
           {/* Action Buttons */}
           <div className="pt-2 border-t border-slate-800 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
+              disabled={isSaving}
               className="px-4 py-2 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-cyan-500 text-slate-950 font-semibold hover:bg-cyan-400 transition-colors"
+              disabled={isSaving}
+              className="px-4 py-2 rounded-md bg-cyan-500 text-slate-950 font-semibold hover:bg-cyan-400 transition-colors disabled:cursor-wait disabled:opacity-70"
             >
-              {assetToEdit ? 'Save Changes' : 'Register Asset'}
+              {isSaving ? 'Saving...' : assetToEdit ? 'Save Changes' : 'Register Asset'}
             </button>
           </div>
         </form>
