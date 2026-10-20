@@ -38,11 +38,10 @@ function getGoogleOAuthConfiguration():
     ? process.env.GOOGLE_REDIRECT_URI?.trim() ||
       (process.env.RENDER_EXTERNAL_URL
         ? `${process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, '')}${GOOGLE_CALLBACK_PATH}`
-        : `https://aegisdisposal-secure-it-asset-disposal.onrender.com${GOOGLE_CALLBACK_PATH}`)
+        : undefined)
     : `http://localhost:${process.env.PORT || 5000}${GOOGLE_CALLBACK_PATH}`;
   const frontendUrl = isProduction
-    ? process.env.FRONTEND_URL?.trim().replace(/\/+$/, '') ||
-      'https://aegis-disposal-secure-it-asset-disp.vercel.app'
+    ? process.env.FRONTEND_URL?.trim().replace(/\/+$/, '') || undefined
     : 'http://localhost:3000';
   const missing = [
     !clientId && 'GOOGLE_CLIENT_ID',

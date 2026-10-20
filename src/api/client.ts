@@ -10,10 +10,7 @@ import {
 } from '../types';
 
 const TOKEN_KEY = 'aegis_auth_token';
-export const API_ORIGIN = (
-  import.meta.env.VITE_API_URL?.trim() ||
-  (import.meta.env.PROD ? 'https://aegisdisposal-secure-it-asset-disposal.onrender.com' : '')
-).replace(/\/+$/, '');
+export const API_ORIGIN = (import.meta.env.VITE_API_URL?.trim() || '').replace(/\/+$/, '');
 const API_BASE = `${API_ORIGIN}/api`;
 
 export class ApiError extends Error {

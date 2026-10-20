@@ -31,8 +31,6 @@ provisionAdminAccount();
 const allowedOrigins = new Set(
   [
     process.env.FRONTEND_URL?.trim().replace(/\/+$/, ''),
-    'https://aegis-disposal-secure-it-asset-disp.vercel.app',
-    'https://aegis-disposal-secure-it-asset-disposal.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
     'http://localhost:4173',

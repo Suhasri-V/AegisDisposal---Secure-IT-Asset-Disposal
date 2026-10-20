@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: aegisdisposal-backend
+    name: aegisdisposal-backend-fresh
     env: node
     plan: free
     autoDeploy: true
@@ -14,14 +14,12 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
-        value: admin@aegisdisposal.local
+        sync: false
       - key: ADMIN_PASSWORD_HASH
-        value: "$2b$12$K/JGczgFzldwcxDs4jZ9QOLnbIMUhTMii/PHkwRbA7Nl3fkJSKdXq"
+        sync: false
       - key: FRONTEND_URL
-        value: https://aegis-disposal-secure-it-asset-disp.vercel.app
+        sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-      - key: GOOGLE_REDIRECT_URI
-        value: https://aegisdisposal-secure-it-asset-disposal.onrender.com/api/auth/google/callback
