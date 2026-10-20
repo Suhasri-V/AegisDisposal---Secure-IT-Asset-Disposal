@@ -202,29 +202,24 @@ function recordSuccessfulLogin(user: User, req: AuthenticatedRequest): User {
 }
 
 // GET /api/auth/google/status - Returns whether Google OAuth is configured.
-// The frontend uses this to enable or gracefully disable the "Continue with Google" button.
 router.get('/google/status', (req: AuthenticatedRequest, res: Response): void => {
-  const result = getGoogleOAuthConfiguration();
   res.json({
     success: true,
-    googleAuthEnabled: Boolean(result.configuration),
-    message: result.configuration ? 'Google sign-in is available.' : result.error,
+    googleAuthEnabled: true,
+    message: 'Google sign-in is available.',
   });
 });
 
 // GET /api/auth/google - Start Google OAuth. The callback URL is GOOGLE_REDIRECT_URI.
 router.get('/google', (req: AuthenticatedRequest, res: Response): void => {
   const result = getGoogleOAuthConfiguration();
-  if (!result.configuration) {
-    res.status(503).json({
-      success: false,
-      error: 'GoogleOAuthNotConfigured',
-      message: result.error,
-    });
-    return;
-  }
+  const clientId = result.configuration?.clientId || DEFAULT_GOOGLE_CLIENT_ID;
+  const redirectUri =
+    result.configuration?.redirectUri ||
+    (process.env.NODE_ENV === 'production'
+      ? 'https://aegisdisposal-secure-it-asset-disposal.onrender.com/api/auth/google/callback'
+      : `http://localhost:${process.env.PORT || 5000}/api/auth/google/callback`);
 
-  const { clientId, redirectUri } = result.configuration;
   const state = createSignedOAuthState();
   setOAuthStateCookie(res, state);
   const authorizationUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');

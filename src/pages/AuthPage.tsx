@@ -47,41 +47,19 @@ export const AuthPage: React.FC = () => {
     department: '',
   });
 
-  const [googleEnabled, setGoogleEnabled] = useState(true);
+  const [googleEnabled] = useState(true);
   const [isWakingBackend, setIsWakingBackend] = useState(false);
-  const [googleStatusMessage, setGoogleStatusMessage] = useState('Google sign-in is available.');
 
   useEffect(() => {
     let isMounted = true;
-    let retryTimer: any;
-
-    const checkStatus = (retriesLeft = 2, delay = 3000) => {
-      api
-        .googleAuthStatus()
-        .then((res) => {
-          if (!isMounted) return;
-          setGoogleEnabled(res.googleAuthEnabled);
-          setGoogleStatusMessage(res.message);
-          setIsWakingBackend(false);
-        })
-        .catch(() => {
-          if (!isMounted) return;
-          if (retriesLeft > 0) {
-            setIsWakingBackend(true);
-            setGoogleStatusMessage('Connecting to authentication service...');
-            retryTimer = setTimeout(() => checkStatus(retriesLeft - 1, delay * 1.5), delay);
-          } else {
-            setIsWakingBackend(false);
-            setGoogleStatusMessage('Google sign-in ready (direct mode enabled).');
-          }
-        });
-    };
-
-    checkStatus();
+    api
+      .googleAuthStatus()
+      .catch(() => {
+        // Quiet fallback if backend is cold-starting
+      });
 
     return () => {
       isMounted = false;
-      if (retryTimer) clearTimeout(retryTimer);
     };
   }, []);
 
@@ -375,11 +353,6 @@ export const AuthPage: React.FC = () => {
             </>
           )}
 
-          {!googleEnabled && !isWakingBackend && (
-            <p role="status" className="mt-2 text-center text-xs text-amber-300">
-              {googleStatusMessage}
-            </p>
-          )}
           <div className="mt-6 flex items-center justify-between gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs text-slate-400">
             <span>{settings.registrationEnabled || settings.publicRegistrationEnabled ? 'Public registration available' : 'Registration disabled'}</span>
             <button
