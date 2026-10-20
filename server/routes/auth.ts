@@ -36,8 +36,17 @@ function getGoogleOAuthConfiguration():
   | { configuration: GoogleOAuthConfiguration; error?: never }
   | { configuration?: never; error: string } {
   const isProduction = process.env.NODE_ENV === 'production';
-  const clientId = process.env.GOOGLE_CLIENT_ID?.trim() || DEFAULT_GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() || DEFAULT_GOOGLE_CLIENT_SECRET;
+  const rawClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientId =
+    rawClientId && rawClientId !== 'undefined' && rawClientId !== 'null' && rawClientId !== '""'
+      ? rawClientId
+      : DEFAULT_GOOGLE_CLIENT_ID;
+
+  const rawClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const clientSecret =
+    rawClientSecret && rawClientSecret !== 'undefined' && rawClientSecret !== 'null' && rawClientSecret !== '""'
+      ? rawClientSecret
+      : DEFAULT_GOOGLE_CLIENT_SECRET;
   const redirectUri = isProduction
     ? process.env.GOOGLE_REDIRECT_URI?.trim() ||
       (process.env.RENDER_EXTERNAL_URL

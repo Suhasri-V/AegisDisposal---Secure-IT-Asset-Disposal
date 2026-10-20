@@ -3,6 +3,7 @@ services:
     name: aegisdisposal-backend
     env: node
     plan: free
+    autoDeploy: true
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run start
     envVars:
@@ -13,9 +14,9 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
-        sync: false
+        value: admin@aegisdisposal.local
       - key: ADMIN_PASSWORD_HASH
-        sync: false
+        value: "$2b$12$K/JGczgFzldwcxDs4jZ9QOLnbIMUhTMii/PHkwRbA7Nl3fkJSKdXq"
       - key: FRONTEND_URL
         value: https://aegis-disposal-secure-it-asset-disp.vercel.app
       - key: GOOGLE_CLIENT_ID
