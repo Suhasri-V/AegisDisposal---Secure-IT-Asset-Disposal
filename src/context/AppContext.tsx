@@ -33,12 +33,6 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<{ ok: boolean; message?: string; user?: User }>;
   loginAdmin: (identifier: string, password: string) => Promise<{ ok: boolean; message?: string; user?: User }>;
   completeGoogleLogin: (token: string) => Promise<{ ok: boolean; message?: string }>;
-  loginWithGoogleProfile: (profile: {
-    email: string;
-    name: string;
-    googleId: string;
-    avatar?: string;
-  }) => Promise<{ ok: boolean; message?: string }>;
   logout: () => void;
   registerUser: (payload: {
     name: string;
@@ -257,43 +251,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { ok: true };
     } catch (err: any) {
       api.clearToken();
-      const msg = err.message || 'Unable to complete Google sign-in.';
-      setError(msg);
-      return { ok: false, message: msg };
-    }
-  };
-
-  const loginWithGoogleProfile = async (profile: {
-    email: string;
-    name: string;
-    googleId: string;
-    avatar?: string;
-  }): Promise<{ ok: boolean; message?: string }> => {
-    try {
-      const emailLower = profile.email.toLowerCase().trim();
-      const isAdminEmail =
-        emailLower === 'admin@aegisdisposal.local' ||
-        emailLower === 'suhasi271426@gmail.com';
-      const role: UserRole = isAdminEmail ? 'Admin' : 'User';
-
-      const user: User = {
-        id: `USR-${profile.googleId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase() || 'GOOGLE'}`,
-        name: profile.name,
-        email: emailLower,
-        role,
-        department: isAdminEmail ? 'Security Operations' : 'General Personnel',
-        status: 'Active',
-        lastLogin: new Date().toLocaleString(),
-        avatar: profile.avatar,
-        googleId: profile.googleId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setCurrentUser(user);
-      setIsAuthenticated(true);
-      localStorage.setItem('aegis_current_user', JSON.stringify(user));
-      return { ok: true };
-    } catch (err: any) {
       const msg = err.message || 'Unable to complete Google sign-in.';
       setError(msg);
       return { ok: false, message: msg };
@@ -528,7 +485,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         login,
         loginAdmin,
         completeGoogleLogin,
-        loginWithGoogleProfile,
         logout,
         registerUser,
         changePassword,

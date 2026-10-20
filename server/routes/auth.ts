@@ -22,31 +22,18 @@ interface GoogleOAuthConfiguration {
   frontendUrl: string;
 }
 
-const DEFAULT_GOOGLE_CLIENT_ID = [
-  '1008518815688',
-  'mkscml1pj4391nnk9hrhqkn5mrtfk3rt.apps.googleusercontent.com',
-].join('-');
-
-const DEFAULT_GOOGLE_CLIENT_SECRET = [
-  'GOCSPX',
-  'oNDweLQYi6zUlIuV4b4_YkLAHk7T',
-].join('-');
-
 function getGoogleOAuthConfiguration():
   | { configuration: GoogleOAuthConfiguration; error?: never }
   | { configuration?: never; error: string } {
   const isProduction = process.env.NODE_ENV === 'production';
   const rawClientId = process.env.GOOGLE_CLIENT_ID?.trim();
   const clientId =
-    rawClientId && rawClientId !== 'undefined' && rawClientId !== 'null' && rawClientId !== '""'
-      ? rawClientId
-      : DEFAULT_GOOGLE_CLIENT_ID;
-
+    rawClientId && !['undefined', 'null', '""'].includes(rawClientId) ? rawClientId : undefined;
   const rawClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
   const clientSecret =
-    rawClientSecret && rawClientSecret !== 'undefined' && rawClientSecret !== 'null' && rawClientSecret !== '""'
+    rawClientSecret && !['undefined', 'null', '""'].includes(rawClientSecret)
       ? rawClientSecret
-      : DEFAULT_GOOGLE_CLIENT_SECRET;
+      : undefined;
   const redirectUri = isProduction
     ? process.env.GOOGLE_REDIRECT_URI?.trim() ||
       (process.env.RENDER_EXTERNAL_URL
@@ -203,22 +190,28 @@ function recordSuccessfulLogin(user: User, req: AuthenticatedRequest): User {
 
 // GET /api/auth/google/status - Returns whether Google OAuth is configured.
 router.get('/google/status', (req: AuthenticatedRequest, res: Response): void => {
+  const result = getGoogleOAuthConfiguration();
   res.json({
     success: true,
-    googleAuthEnabled: true,
-    message: 'Google sign-in is available.',
+    googleAuthEnabled: Boolean(result.configuration),
+    message: result.configuration
+      ? 'Google sign-in is available.'
+      : result.error,
   });
 });
 
 // GET /api/auth/google - Start Google OAuth. The callback URL is GOOGLE_REDIRECT_URI.
 router.get('/google', (req: AuthenticatedRequest, res: Response): void => {
   const result = getGoogleOAuthConfiguration();
-  const clientId = result.configuration?.clientId || DEFAULT_GOOGLE_CLIENT_ID;
-  const redirectUri =
-    result.configuration?.redirectUri ||
-    (process.env.NODE_ENV === 'production'
-      ? 'https://aegisdisposal-secure-it-asset-disposal.onrender.com/api/auth/google/callback'
-      : `http://localhost:${process.env.PORT || 5000}/api/auth/google/callback`);
+  if (!result.configuration) {
+    res.status(503).json({
+      success: false,
+      error: 'GoogleOAuthNotConfigured',
+      message: result.error,
+    });
+    return;
+  }
+  const { clientId, redirectUri } = result.configuration;
 
   const state = createSignedOAuthState();
   setOAuthStateCookie(res, state);

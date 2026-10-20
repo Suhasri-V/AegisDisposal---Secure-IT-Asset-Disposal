@@ -57,6 +57,36 @@ async function runTestSuite() {
   let testCertId = '';
 
   try {
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    delete process.env.GOOGLE_CLIENT_ID;
+    delete process.env.GOOGLE_CLIENT_SECRET;
+    try {
+      const googleStatusResponse = await fetch(`${baseUrl}/auth/google/status`);
+      const googleStatusData: any = await googleStatusResponse.json();
+      assert(
+        googleStatusResponse.status === 200 && googleStatusData.googleAuthEnabled === false,
+        24,
+        'Google OAuth status reports missing credentials',
+        `Enabled: ${googleStatusData.googleAuthEnabled}`
+      );
+
+      const googleStartResponse = await fetch(`${baseUrl}/auth/google`, { redirect: 'manual' });
+      const googleStartData: any = await googleStartResponse.json();
+      assert(
+        googleStartResponse.status === 503 &&
+          googleStartData.error === 'GoogleOAuthNotConfigured' &&
+          googleStartData.message.includes('GOOGLE_CLIENT_ID') &&
+          googleStartData.message.includes('GOOGLE_CLIENT_SECRET'),
+        25,
+        'Google OAuth start fails clearly when credentials are missing',
+        `Status: ${googleStartResponse.status}, error: ${googleStartData.error}`
+      );
+    } finally {
+      if (googleClientId !== undefined) process.env.GOOGLE_CLIENT_ID = googleClientId;
+      if (googleClientSecret !== undefined) process.env.GOOGLE_CLIENT_SECRET = googleClientSecret;
+    }
+
     // 1. Valid Admin login succeeds
     const adminLoginRes = await fetch(`${baseUrl}/auth/admin/login`, {
       method: 'POST',
