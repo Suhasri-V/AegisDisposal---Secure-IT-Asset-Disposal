@@ -19,8 +19,8 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
-        sync: false
+        value: suhasri271426@gmail.com
       - key: ADMIN_PASSWORD_HASH
         sync: false
       - key: FRONTEND_URL
-        sync: false
+        value: https://aegis-disposal-secure-it-asset-disp.vercel.app
