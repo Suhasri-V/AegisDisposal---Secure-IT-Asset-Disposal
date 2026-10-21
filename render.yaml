@@ -1,26 +1,28 @@
 services:
   - type: web
-    name: aegisdisposal-api-prod
+    name: aegisdisposal-backend
     env: node
-    plan: starter
+    plan: free
     autoDeploy: true
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run start
     healthCheckPath: /api/health
-    disk:
-      name: aegisdisposal-data
-      mountPath: /opt/render/project/src/server/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATA_DIR
-        value: /opt/render/project/src/server/data
+      - key: PORT
+        value: 10000
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
-        value: suhasri271426@gmail.com
+        value: admin@aegisdisposal.local
       - key: ADMIN_PASSWORD_HASH
-        sync: false
+        value: "$2b$12$K/JGczgFzldwcxDs4jZ9QOLnbIMUhTMii/PHkwRbA7Nl3fkJSKdXq"
       - key: FRONTEND_URL
         value: https://aegis-disposal-secure-it-asset-disp.vercel.app
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://aegisdisposal-secure-it-asset-disposal.onrender.com/api/auth/google/callback
