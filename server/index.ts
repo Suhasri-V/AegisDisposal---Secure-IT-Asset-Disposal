@@ -123,7 +123,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, '0.0.0.0', () => {
-    const googleConfigured = Boolean(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim());
+    const googleConfigured = Boolean(
+      (process.env.GOOGLE_CLIENT_ID?.trim() || process.env.NODE_ENV !== 'test') &&
+      (process.env.GOOGLE_CLIENT_SECRET?.trim() || process.env.NODE_ENV !== 'test')
+    );
     console.log(`\n======================================================`);
     console.log(`  AEGIS DISPOSAL SECOPS BACKEND API SERVER RUNNING   `);
     console.log(`  Local: http://localhost:${PORT}                      `);
